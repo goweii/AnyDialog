@@ -1,13 +1,4 @@
-*.iml
-.gradle
-/local.properties
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
+# Created by .ignore support plugin (hsz.mobi)
 ### Android template
 # Built application files
 *.apk
@@ -66,3 +57,8 @@ freeline.py
 freeline/
 freeline_project_description.json
 
+.idea/dictionaries/
+.idea/libraries/
+.idea/modules.xml
+AnyDialog.iml
+dialog/src/main/res/drawable/
