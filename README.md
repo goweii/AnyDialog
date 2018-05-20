@@ -9,5 +9,5 @@ Android高定制性，高易用性Dialog。
 
 ## 截图
 
-![https://github.com/goweii/AnyDialog/blob/1.0/screenshot/demo-1.0.gif]()
+![https://github.com/goweii/AnyDialog/blob/1.0/screenshot/demo_1.0.gif]()
 
