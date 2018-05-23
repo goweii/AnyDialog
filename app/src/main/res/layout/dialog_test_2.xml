@@ -4,30 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="20dp"
-    android:background="@color/colorAccent"
+    android:background="#dddddd"
     android:gravity="center"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/tv_1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:layout_height="40dp"
         android:gravity="center"
         tools:text="测试数据1" />
 
     <ImageView
         android:id="@+id/iv_1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="80dp"
         android:gravity="center"
         android:scaleType="centerCrop"
-        tools:src="@mipmap/ic_launcher" />
+        android:src="@drawable/ic_launcher_background" />
 
     <Button
         android:id="@+id/btn_1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
+        android:background="#cccccc"
         android:text="按钮1" />
 
 </LinearLayout>

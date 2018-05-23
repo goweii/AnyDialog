@@ -19,6 +19,9 @@ public class ViewHolder {
 
     public void bindListener(View contentWrapper){
         this.contentWrapper = contentWrapper;
+        if (onClickListeners == null){
+            return;
+        }
         for (int i = 0; i < onClickListeners.size(); i++) {
             int viewId = onClickListeners.keyAt(i);
             View.OnClickListener onClickListener = onClickListeners.valueAt(i);

@@ -18,7 +18,6 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -64,8 +63,8 @@ public class AnyDialog extends Dialog {
     @DrawableRes
     private int backgroundResource = -1;
 
-    private long backgroundAnimDuration = 200;
-    private long contentAnimDuration = 250;
+    private long backgroundAnimDuration = 100;
+    private long contentAnimDuration = 150;
 
     private IBackgroundAnim backgroundAnim = null;
     private Animation backgroundInAnim = null;
@@ -107,7 +106,7 @@ public class AnyDialog extends Dialog {
         }, getDuration());
     }
 
-    private long getDuration(){
+    private long getDuration() {
         return Math.max(backgroundAnimDuration, contentAnimDuration);
     }
 
@@ -183,6 +182,15 @@ public class AnyDialog extends Dialog {
         }
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            startContentInAnim();
+            startBackgroundInAnim();
+        }
+    }
+
     private void initContentWrapper() {
         if (contentId != -1) {
             content = LayoutInflater.from(context).inflate(contentId, contentWrapper, false);
@@ -195,7 +203,6 @@ public class AnyDialog extends Dialog {
         if (gravity != -1) {
             contentWrapper.setGravity(gravity);
         }
-        startContentInAnim();
     }
 
     private void initBackground() {
@@ -230,7 +237,6 @@ public class AnyDialog extends Dialog {
         } else if (backgroundColor != Color.TRANSPARENT) {
             background.setImageDrawable(new ColorDrawable(backgroundColor));
         }
-        startBackgroundInAnim();
     }
 
     private void startContentInAnim() {
@@ -240,7 +246,7 @@ public class AnyDialog extends Dialog {
             if (contentInAnim != null) {
                 content.startAnimation(contentInAnim);
             } else {
-                AnimHelper.startDefaultContentInAnim(content, contentAnimDuration);
+                AnimHelper.startZoomInAnim(content, contentAnimDuration);
             }
         }
     }
@@ -252,7 +258,7 @@ public class AnyDialog extends Dialog {
             if (contentOutAnim != null) {
                 content.startAnimation(contentOutAnim);
             } else {
-                AnimHelper.startDefaultContentOutAnim(content, contentAnimDuration);
+                AnimHelper.startZoomOutAnim(content, contentAnimDuration);
             }
         }
     }
@@ -264,7 +270,7 @@ public class AnyDialog extends Dialog {
             if (backgroundInAnim != null) {
                 background.startAnimation(backgroundInAnim);
             } else {
-                AnimHelper.startDefaultBackgroundInAnim(background, backgroundAnimDuration);
+                AnimHelper.startAlphaInAnim(background, backgroundAnimDuration);
             }
         }
     }
@@ -276,7 +282,7 @@ public class AnyDialog extends Dialog {
             if (backgroundOutAnim != null) {
                 background.startAnimation(backgroundOutAnim);
             } else {
-                AnimHelper.startDefaultBackgroundOutAnim(background, backgroundAnimDuration);
+                AnimHelper.startAlphaOutAnim(background, backgroundAnimDuration);
             }
         }
     }
@@ -398,7 +404,7 @@ public class AnyDialog extends Dialog {
     }
 
     public AnyDialog backgroundColorRes(@ColorRes int color) {
-        backgroundColor = ContextCompat.getColor(context, color);
+        backgroundColor = context.getResources().getColor(color);
         return this;
     }
 

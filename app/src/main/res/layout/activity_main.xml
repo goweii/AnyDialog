@@ -1,38 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/tv_show_full"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:gravity="center"
-        android:text="全屏dialog" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tv_show_blur_bg"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:gravity="center"
-        android:text="背景高斯模糊dialog" />
+        <TextView
+            android:id="@+id/tv_show_full"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="全屏" />
 
-    <TextView
-        android:id="@+id/tv_show_dark_bg"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:gravity="center"
-        android:text="背景变暗dialog" />
+        <TextView
+            android:id="@+id/tv_show_blur_bg"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="背景高斯模糊" />
 
-    <TextView
-        android:id="@+id/tv_show_tran_bg"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:gravity="center"
-        android:text="背景全透明dialog" />
+        <TextView
+            android:id="@+id/tv_show_dark_bg"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="背景变暗" />
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/tv_show_tran_bg"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="背景全透明" />
+
+        <TextView
+            android:id="@+id/tv_show_bottom_in"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="底部进入底部退出" />
+
+        <TextView
+            android:id="@+id/tv_show_bottom_alpha_in"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="alpha底部进入底部退出" />
+
+        <TextView
+            android:id="@+id/tv_show_top_in"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="顶部进入顶部退出" />
+
+        <TextView
+            android:id="@+id/tv_show_top_alpha_in"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="alpha顶部进入顶部退出" />
+
+        <TextView
+            android:id="@+id/tv_show_top_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="顶部进入底部退出" />
+
+        <TextView
+            android:id="@+id/tv_show_top_bottom_alpha"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="alpha顶部进入底部退出" />
+
+        <TextView
+            android:id="@+id/tv_show_bottom_top"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="底部进入顶部退出" />
+
+        <TextView
+            android:id="@+id/tv_show_bottom_top_alpha"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="alpha底部进入顶部退出" />
+
+        <TextView
+            android:id="@+id/tv_show_left_in"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="左侧进入左侧退出" />
+
+        <TextView
+            android:id="@+id/tv_show_left_alpha_in"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="alpha左侧进入左侧退出" />
+
+        <TextView
+            android:id="@+id/tv_show_right_in"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="右侧进入右侧退出" />
+
+        <TextView
+            android:id="@+id/tv_show_right_alpha_in"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="alpha右侧进入右侧退出" />
+
+        <TextView
+            android:id="@+id/tv_show_left_right"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="左侧进入右侧退出" />
+
+        <TextView
+            android:id="@+id/tv_show_left_right_alpha"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="alpha左侧进入右侧退出" />
+
+        <TextView
+            android:id="@+id/tv_show_right_left"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="右侧进入左侧退出" />
+
+        <TextView
+            android:id="@+id/tv_show_right_left_alpha"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="alpha右侧进入左侧退出" />
+
+    </LinearLayout>
+
+</ScrollView>
