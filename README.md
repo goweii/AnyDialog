@@ -1,6 +1,7 @@
 # AnyDialog 使用说明
 
 [GitHub 主页](https://github.com/goweii/SwipeDragTreeRecyclerView)
+
 Android高定制性，高易用性Dialog。
 
 ## **简介**
@@ -12,7 +13,7 @@ Android高定制性，高易用性Dialog。
 
 ## **下载**
 
-- Demo：[下载](https://github.com/goweii/AnyDialog/releases/download/1.0/AnyDialog-demo-1.0.apk)
+- Demo：[下载](https://github.com/goweii/AnyDialog/releases)
 
 ## **截图**
 
@@ -84,10 +85,25 @@ Android高定制性，高易用性Dialog。
 ```java
  AnyDialog.with(MainActivity.this)
           .contentView(R.layout.dialog_test_1)
-          // .backgroundBlur(20)	// 设置背景模糊度
+          // .backgroundBlur(80)  // 设置背景模糊度
           .backgroundColorInt(0x33000000)
           .touchOutsideCancelable(true)
           .clickBackCancelable(true)
+          .contentAnim(new IContentAnim() {  // 自定义dialog主体动画
+              @Override
+              public long inAnim(View content) {
+                  // 对View设置进入动画并返回动画时长
+                  AnimHelper.startLeftAlphaInAnim(content, 300);
+                  return 300;
+              }
+
+              @Override
+              public long outAnim(View content) {
+                  // 对View设置消失动画并返回动画时长
+                  AnimHelper.startRightAlphaOutAnim(content, 300);
+                  return 300;
+              }
+          })
           .bindData(new IDataBinder() {
                @Override
                public void bind(AnyDialog anyDialog) {
