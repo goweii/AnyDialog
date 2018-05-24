@@ -25,7 +25,7 @@ public final class ScreenShotUtils {
      * @return Bitmap
      */
     public static Bitmap snapshotWithStatusBar(Activity activity) {
-        View view = activity.getWindow().getDecorView();
+        View view = activity.getWindow().getDecorView().getRootView();
         view.setDrawingCacheEnabled(true);
         view.buildDrawingCache(true);
         view.destroyDrawingCache();
@@ -45,7 +45,7 @@ public final class ScreenShotUtils {
      * @return Bitmap
      */
     public static Bitmap snapshotWithoutStatusBar(Activity activity) {
-        View view = activity.getWindow().getDecorView();
+        View view = activity.getWindow().getDecorView().getRootView();
         view.setDrawingCacheEnabled(true);
         view.buildDrawingCache(true);
         view.destroyDrawingCache();
