@@ -25,15 +25,16 @@ public final class ScreenShotUtils {
      * @return Bitmap
      */
     public static Bitmap snapshotWithStatusBar(Activity activity) {
-        View view = activity.getWindow().getDecorView();
+        View view = activity.getWindow().getDecorView().getRootView();
         view.setDrawingCacheEnabled(true);
-        view.buildDrawingCache();
+        view.buildDrawingCache(true);
+        view.destroyDrawingCache();
         Bitmap bmp = view.getDrawingCache();
         DisplayInfoUtils displayInfoUtils = DisplayInfoUtils.getInstance(activity);
         int width = displayInfoUtils.getWidthPixels();
         int height = displayInfoUtils.getHeightPixels();
         Bitmap bp = Bitmap.createBitmap(bmp, 0, 0, width, height);
-        view.destroyDrawingCache();
+        bmp = null;
         return bp;
     }
 
@@ -44,9 +45,10 @@ public final class ScreenShotUtils {
      * @return Bitmap
      */
     public static Bitmap snapshotWithoutStatusBar(Activity activity) {
-        View view = activity.getWindow().getDecorView();
+        View view = activity.getWindow().getDecorView().getRootView();
         view.setDrawingCacheEnabled(true);
-        view.buildDrawingCache();
+        view.buildDrawingCache(true);
+        view.destroyDrawingCache();
         Bitmap bmp = view.getDrawingCache();
         Rect frame = new Rect();
         activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
@@ -55,7 +57,7 @@ public final class ScreenShotUtils {
         int width = displayInfoUtils.getWidthPixels();
         int height = displayInfoUtils.getHeightPixels();
         Bitmap bp = Bitmap.createBitmap(bmp, 0, statusBarHeight, width, height - statusBarHeight);
-        view.destroyDrawingCache();
+        bmp = null;
         return bp;
 
     }
