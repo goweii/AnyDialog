@@ -4,6 +4,9 @@ import android.support.annotation.IdRes;
 import android.util.SparseArray;
 import android.view.View;
 
+import pers.goweii.dialog.listener.OnDialogClickListener;
+import pers.goweii.dialog.surface.AnyDialog;
+
 /**
  * @author CuiZhen
  * @date 2018/5/20
@@ -13,9 +16,14 @@ import android.view.View;
  */
 public class ViewHolder {
 
+    private final AnyDialog anyDialog;
     private View contentWrapper;
     private SparseArray<View> views = null;
-    private SparseArray<View.OnClickListener> onClickListeners = null;
+    private SparseArray<OnDialogClickListener> onClickListeners = null;
+
+    public ViewHolder(AnyDialog anyDialog){
+        this.anyDialog = anyDialog;
+    }
 
     public void bindListener(View contentWrapper){
         this.contentWrapper = contentWrapper;
@@ -24,8 +32,13 @@ public class ViewHolder {
         }
         for (int i = 0; i < onClickListeners.size(); i++) {
             int viewId = onClickListeners.keyAt(i);
-            View.OnClickListener onClickListener = onClickListeners.valueAt(i);
-            getView(viewId).setOnClickListener(onClickListener);
+            final OnDialogClickListener listener = onClickListeners.valueAt(i);
+            getView(viewId).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onClick(anyDialog, v);
+                }
+            });
         }
     }
 
@@ -41,12 +54,12 @@ public class ViewHolder {
         return (V) views.get(viewId);
     }
 
-    public void addOnClickListener(@IdRes int viewId, View.OnClickListener onClickListener) {
+    public void addOnClickListener(@IdRes int viewId, OnDialogClickListener listener) {
         if (onClickListeners == null) {
             onClickListeners = new SparseArray<>();
         }
         if (onClickListeners.indexOfKey(viewId) < 0) {
-            onClickListeners.put(viewId, onClickListener);
+            onClickListeners.put(viewId, listener);
         }
     }
 }

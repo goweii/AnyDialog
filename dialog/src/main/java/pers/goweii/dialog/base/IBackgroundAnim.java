@@ -1,6 +1,6 @@
 package pers.goweii.dialog.base;
 
-import android.widget.ImageView;
+import android.view.View;
 
 /**
  * @author CuiZhen
@@ -16,7 +16,7 @@ public interface IBackgroundAnim {
      * @param background 背景
      * @return 动画时长
      */
-    long inAnim(ImageView background);
+    long inAnim(View background);
 
     /**
      * 背景消失动画
@@ -24,5 +24,5 @@ public interface IBackgroundAnim {
      * @param background 背景
      * @return 动画时长
      */
-    long outAnim(ImageView background);
+    long outAnim(View background);
 }

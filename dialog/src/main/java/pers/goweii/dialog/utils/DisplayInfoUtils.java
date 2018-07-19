@@ -1,10 +1,16 @@
 package pers.goweii.dialog.utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.Display;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 
 /**
@@ -25,34 +31,14 @@ public final class DisplayInfoUtils {
     private final DisplayMetrics mDisplayMetrics;
     private final Context mContext;
 
-    public static DisplayInfoUtils getInstance(){
-        return new DisplayInfoUtils();
-    }
-
-    public static DisplayInfoUtils getInstance(Activity activity){
-        return new DisplayInfoUtils(activity);
-    }
-
-    public static DisplayInfoUtils getInstance(Context context){
-        return new DisplayInfoUtils(context);
-    }
-
-    private DisplayInfoUtils(Activity activity) {
-        WindowManager windowManager = activity.getWindowManager();
-        mDisplayMetrics = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(mDisplayMetrics);
-        mContext = activity;
-    }
-
     private DisplayInfoUtils(Context context) {
         Resources resources = context.getResources();
         mDisplayMetrics = resources.getDisplayMetrics();
         mContext = context;
     }
 
-    private DisplayInfoUtils() {
-        mDisplayMetrics = Resources.getSystem().getDisplayMetrics();
-        mContext = null;
+    public static DisplayInfoUtils getInstance(Context context) {
+        return new DisplayInfoUtils(context);
     }
 
     /**
@@ -124,19 +110,56 @@ public final class DisplayInfoUtils {
      * @return px
      */
     public int getStatusBarHeight() {
-        if (mContext == null){
-            int resourceId = Resources.getSystem().getIdentifier("status_bar_height", "dimen", "android");
-            if (resourceId > 0) {
-                return Resources.getSystem().getDimensionPixelSize(resourceId);
-            }
-            return 0;
-        } else {
-            int resourceId = mContext.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        int resourceId = mContext.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return mContext.getResources().getDimensionPixelSize(resourceId);
+        }
+        return 0;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public boolean hasNavigationBar(WindowManager windowManager) {
+        Display d = windowManager.getDefaultDisplay();
+
+        DisplayMetrics realDisplayMetrics = new DisplayMetrics();
+        d.getRealMetrics(realDisplayMetrics);
+
+        int realHeight = realDisplayMetrics.heightPixels;
+        int realWidth = realDisplayMetrics.widthPixels;
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        d.getMetrics(displayMetrics);
+
+        int displayHeight = displayMetrics.heightPixels;
+        int displayWidth = displayMetrics.widthPixels;
+
+        return (realWidth - displayWidth) > 0 || (realHeight - displayHeight) > 0;
+    }
+
+    /**
+     * 获取导航栏高度
+     *
+     * @return
+     */
+    public int getNavigationBarHeight() {
+        int rid = mContext.getResources().getIdentifier("config_showNavigationBar", "bool", "android");
+        if (rid != 0) {
+            int resourceId = mContext.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
             if (resourceId > 0) {
                 return mContext.getResources().getDimensionPixelSize(resourceId);
             }
-            return 0;
         }
+        return 0;
+    }
+
+    public Point getAppUsableScreenSize() {
+        WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        Point size = new Point(0, 0);
+        if (windowManager != null) {
+            Display display = windowManager.getDefaultDisplay();
+            display.getSize(size);
+        }
+        return size;
     }
 
     /**
@@ -219,4 +242,24 @@ public final class DisplayInfoUtils {
         return (int) (sp * getScaledDensity() / getDensity() + 0.5f);
     }
 
+
+    /**
+     * 第一种：判断手机是否有物理按键，有就没有导航栏，反之就有（这个有点问题，逻辑不严谨，4.0以上所有手机都可以显示NavigationBar，只是手机厂家屏蔽了）。
+     *
+     * @param activity
+     * @return
+     */
+    public static boolean checkDeviceHasNavigationBar(Context activity) {
+        //通过判断设备是否有返回键、菜单键(不是虚拟键,是手机屏幕外的按键)来确定是否有navigation bar
+        boolean hasMenuKey = ViewConfiguration.get(activity)
+                .hasPermanentMenuKey();
+        boolean hasBackKey = KeyCharacterMap
+                .deviceHasKey(KeyEvent.KEYCODE_BACK);
+
+        if (!hasMenuKey && !hasBackKey) {
+            // 做任何自己需要做的,这个设备有一个导航栏
+            return true;
+        }
+        return false;
+    }
 }

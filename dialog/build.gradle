@@ -20,6 +20,15 @@ android {
         }
     }
 
+    task makeJar(dependsOn:['compileReleaseJavaWithJavac'], type:Jar) {
+        delete 'build/outputs/jar/AnyDialog.jar'
+        baseName = "androidJar"
+        extension = "jar"
+        archiveName = "AnyDialog.jar"
+        from('build/intermediates/bundles/release/')
+        into('build/outputs/jar/')
+        include('build/intermediates/intermediate-jars/release/classes.jar')
+    }
 }
 
 dependencies {

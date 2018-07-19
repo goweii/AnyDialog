@@ -18,6 +18,7 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -33,7 +34,10 @@ import pers.goweii.dialog.base.IBackgroundAnim;
 import pers.goweii.dialog.base.IContentAnim;
 import pers.goweii.dialog.base.IDataBinder;
 import pers.goweii.dialog.holder.ViewHolder;
+import pers.goweii.dialog.listener.OnDialogClickListener;
+import pers.goweii.dialog.utils.DisplayInfoUtils;
 import pers.goweii.dialog.utils.ScreenShotUtils;
+import pers.goweii.dialog.utils.SoftInputUtils;
 import pers.goweii.dialog.utils.blur.BlurUtils;
 
 /**
@@ -48,12 +52,12 @@ public class AnyDialog extends Dialog {
     private final Context context;
     private final ViewHolder viewHolder;
 
-    private ImageView background;
+    private ImageView backgroundView;
     private RelativeLayout contentWrapper;
 
     @LayoutRes
     private int contentId = -1;
-    private View content = null;
+    private View contentView = null;
 
     private float backgroundBlurRadius = 0;
     @ColorInt
@@ -75,14 +79,13 @@ public class AnyDialog extends Dialog {
 
     private IDataBinder dataBinder = null;
 
-    private boolean fitStatusBar = false;
     private int gravity = -1;
     private boolean touchOutsideCancelable = true;
 
     private AnyDialog(@NonNull Context context) {
-        super(context);
+        super(context, R.style.DialogFullscreen);
         this.context = context;
-        this.viewHolder = new ViewHolder();
+        this.viewHolder = new ViewHolder(this);
     }
 
     public static AnyDialog with(@NonNull Context context) {
@@ -101,6 +104,13 @@ public class AnyDialog extends Dialog {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                if (contentView != null) {
+                    contentView.setAlpha(1);
+                    contentView.setScaleX(1);
+                    contentView.setScaleY(1);
+                    contentView.setTranslationX(0);
+                    contentView.setTranslationY(0);
+                }
                 AnyDialog.super.dismiss();
             }
         }, getDuration());
@@ -121,41 +131,24 @@ public class AnyDialog extends Dialog {
         WindowManager.LayoutParams layoutParams = window.getAttributes();
         layoutParams.alpha = 1f;
         layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-        layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+        layoutParams.height = DisplayInfoUtils.getInstance(context).getAppUsableScreenSize().y;
+
         layoutParams.dimAmount = 0;
+        window.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         window.setAttributes(layoutParams);
 
         View decorView = window.getDecorView();
         decorView.setPadding(0, 0, 0, 0);
         decorView.setBackgroundColor(Color.TRANSPARENT);
-        int uiOptions = decorView.getSystemUiVisibility();
-        if (context instanceof Activity) {
-            Activity activity = (Activity) context;
-            int activityFlags = activity.getWindow().getAttributes().flags;
-            window.addFlags(activityFlags);
-            if (((activityFlags & WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS) == WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-                    || ((activityFlags & WindowManager.LayoutParams.FLAG_FULLSCREEN) == WindowManager.LayoutParams.FLAG_FULLSCREEN)) {
-                fitStatusBar = true;
-            }
-            int activityUiOptions = activity.getWindow().getDecorView().getSystemUiVisibility();
-            uiOptions = uiOptions | activityUiOptions;
-            if (((activityUiOptions & View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-                    || ((activityUiOptions & View.SYSTEM_UI_FLAG_FULLSCREEN) == View.SYSTEM_UI_FLAG_FULLSCREEN)) {
-                fitStatusBar = true;
-            }
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                fitStatusBar = true;
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                uiOptions = uiOptions
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-                fitStatusBar = true;
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
-        decorView.setSystemUiVisibility(uiOptions);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.setStatusBarColor(Color.TRANSPARENT);
+        }
     }
 
     @Override
@@ -165,8 +158,8 @@ public class AnyDialog extends Dialog {
 
         initWindow();
 
-        background = findViewById(R.id.iv_background);
-        if (background != null) {
+        backgroundView = findViewById(R.id.iv_background);
+        if (backgroundView != null) {
             initBackground();
         }
 
@@ -191,23 +184,30 @@ public class AnyDialog extends Dialog {
         }
     }
 
+    public View getContentView() {
+        return contentView;
+    }
+
     private void initContentWrapper() {
         if (contentId != -1) {
-            content = LayoutInflater.from(context).inflate(contentId, contentWrapper, false);
+            contentView = LayoutInflater.from(context).inflate(contentId, contentWrapper, false);
         }
-        if (content != null) {
-            content.setFocusable(true);
-            content.setClickable(true);
-            contentWrapper.addView(content);
+        if (contentView != null) {
+            contentView.setFocusable(true);
+            contentView.setClickable(true);
+            contentWrapper.addView(contentView);
         }
         if (gravity != -1) {
             contentWrapper.setGravity(gravity);
+        }
+        if (context instanceof Activity) {
+            SoftInputUtils.init((Activity) context).duration(200).raise(contentView);
         }
     }
 
     private void initBackground() {
         if (touchOutsideCancelable) {
-            background.setOnClickListener(new View.OnClickListener() {
+            backgroundView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     dismiss();
@@ -217,72 +217,72 @@ public class AnyDialog extends Dialog {
         if (backgroundBlurRadius > 0) {
             if (context instanceof Activity) {
                 Activity activity = (Activity) context;
-                Bitmap snapshot;
-                if (fitStatusBar) {
-                    snapshot = ScreenShotUtils.snapshotWithStatusBar(activity);
-                } else {
-                    snapshot = ScreenShotUtils.snapshotWithoutStatusBar(activity);
-                }
+                Bitmap snapshot = ScreenShotUtils.snapshotWithStatusBar(activity);
                 Bitmap blur = BlurUtils.blur(context, snapshot, backgroundBlurRadius);
-                background.setImageBitmap(blur);
-                background.setColorFilter(backgroundColor);
+                backgroundView.setImageBitmap(blur);
+                backgroundView.setColorFilter(backgroundColor);
             }
-        } else if (backgroundBitmap != null) {
-            background.setImageBitmap(backgroundBitmap);
-            background.setColorFilter(backgroundColor);
-        } else if (backgroundResource != -1) {
-            background.setImageResource(backgroundResource);
-        } else if (backgroundDrawable != null) {
-            background.setImageDrawable(backgroundDrawable);
-        } else if (backgroundColor != Color.TRANSPARENT) {
-            background.setImageDrawable(new ColorDrawable(backgroundColor));
+        } else {
+            backgroundView.setVisibility(View.VISIBLE);
+            if (backgroundBitmap != null) {
+                backgroundView.setImageBitmap(backgroundBitmap);
+                backgroundView.setColorFilter(backgroundColor);
+            } else if (backgroundResource != -1) {
+                backgroundView.setImageResource(backgroundResource);
+                backgroundView.setColorFilter(backgroundColor);
+            } else if (backgroundDrawable != null) {
+                backgroundView.setImageDrawable(backgroundDrawable);
+                backgroundView.setColorFilter(backgroundColor);
+            } else if (backgroundColor != Color.TRANSPARENT) {
+                backgroundView.setImageDrawable(new ColorDrawable(backgroundColor));
+            }
         }
     }
 
     private void startContentInAnim() {
         if (contentAnim != null) {
-            contentAnimDuration = contentAnim.inAnim(content);
+            contentAnimDuration = contentAnim.inAnim(contentView);
         } else {
             if (contentInAnim != null) {
-                content.startAnimation(contentInAnim);
+                contentView.startAnimation(contentInAnim);
             } else {
-                AnimHelper.startZoomInAnim(content, contentAnimDuration);
+                AnimHelper.startZoomInAnim(contentView, contentAnimDuration);
             }
         }
     }
 
     private void startContentOutAnim() {
         if (contentAnim != null) {
-            contentAnimDuration = contentAnim.outAnim(content);
+            contentAnimDuration = contentAnim.outAnim(contentView);
         } else {
             if (contentOutAnim != null) {
-                content.startAnimation(contentOutAnim);
+                contentView.startAnimation(contentOutAnim);
             } else {
-                AnimHelper.startZoomOutAnim(content, contentAnimDuration);
+                AnimHelper.startZoomOutAnim(contentView, contentAnimDuration);
             }
         }
     }
 
     private void startBackgroundInAnim() {
         if (backgroundAnim != null) {
-            backgroundAnimDuration = backgroundAnim.inAnim(background);
+            backgroundAnimDuration = backgroundAnim.inAnim(backgroundView);
         } else {
             if (backgroundInAnim != null) {
-                background.startAnimation(backgroundInAnim);
+                backgroundView.startAnimation(backgroundInAnim);
             } else {
-                AnimHelper.startAlphaInAnim(background, backgroundAnimDuration);
+                AnimHelper.startAlphaInAnim(backgroundView, backgroundAnimDuration);
             }
         }
     }
 
     private void startBackgroundOutAnim() {
         if (backgroundAnim != null) {
-            backgroundAnimDuration = backgroundAnim.outAnim(background);
+            backgroundAnimDuration = backgroundAnim.outAnim(backgroundView);
         } else {
             if (backgroundOutAnim != null) {
-                background.startAnimation(backgroundOutAnim);
+                backgroundView.startAnimation(backgroundOutAnim);
             } else {
-                AnimHelper.startAlphaOutAnim(background, backgroundAnimDuration);
+                AnimHelper.startAlphaOutAnim(backgroundView, backgroundAnimDuration);
             }
         }
     }
@@ -352,7 +352,7 @@ public class AnyDialog extends Dialog {
     }
 
     public AnyDialog contentView(View contentView) {
-        content = contentView;
+        this.contentView = contentView;
         return this;
     }
 
@@ -370,7 +370,7 @@ public class AnyDialog extends Dialog {
      * @param radius 模糊半径
      * @return AnyDialog
      */
-    public AnyDialog backgroundBlur(@FloatRange(from = 0, fromInclusive = false) float radius) {
+    public AnyDialog backgroundBlur(@FloatRange(from = 0, fromInclusive = false, to = 25) float radius) {
         backgroundBlurRadius = radius;
         return this;
     }
@@ -435,8 +435,8 @@ public class AnyDialog extends Dialog {
         return this;
     }
 
-    public AnyDialog onClick(@IdRes int viewId, View.OnClickListener onClickListener) {
-        viewHolder.addOnClickListener(viewId, onClickListener);
+    public AnyDialog onClick(@IdRes int viewId, OnDialogClickListener listener) {
+        viewHolder.addOnClickListener(viewId, listener);
         return this;
     }
 

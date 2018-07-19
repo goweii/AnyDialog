@@ -10,6 +10,7 @@ import android.widget.Toast;
 import pers.goweii.dialog.anim.AnimHelper;
 import pers.goweii.dialog.base.IContentAnim;
 import pers.goweii.dialog.base.IDataBinder;
+import pers.goweii.dialog.listener.OnDialogClickListener;
 import pers.goweii.dialog.surface.AnyDialog;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -106,9 +107,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 iv_1.setImageResource(R.mipmap.ic_launcher);
                             }
                         })
-                        .onClick(R.id.btn_1, new View.OnClickListener() {
+                        .onClick(R.id.btn_1, new OnDialogClickListener() {
                             @Override
-                            public void onClick(View v) {
+                            public void onClick(AnyDialog anyDialog, View v) {
                                 Toast.makeText(MainActivity.this, "点击了btn_1", Toast.LENGTH_SHORT).show();
                             }
                         })
@@ -117,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.tv_show_blur_bg:
                 AnyDialog.with(MainActivity.this)
                         .contentView(R.layout.dialog_test_2)
-                        .backgroundBlur(80)
+                        .backgroundBlur(25)
                         .touchOutsideCancelable(true)
                         .clickBackCancelable(true)
                         .bindData(new IDataBinder() {
@@ -129,9 +130,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 iv_1.setImageResource(R.mipmap.ic_launcher);
                             }
                         })
-                        .onClick(R.id.btn_1, new View.OnClickListener() {
+                        .onClick(R.id.btn_1, new OnDialogClickListener() {
                             @Override
-                            public void onClick(View v) {
+                            public void onClick(AnyDialog anyDialog, View v) {
                                 Toast.makeText(MainActivity.this, "点击了btn_1", Toast.LENGTH_SHORT).show();
                             }
                         })
@@ -152,9 +153,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 iv_1.setImageResource(R.mipmap.ic_launcher);
                             }
                         })
-                        .onClick(R.id.btn_1, new View.OnClickListener() {
+                        .onClick(R.id.btn_1, new OnDialogClickListener() {
                             @Override
-                            public void onClick(View v) {
+                            public void onClick(AnyDialog anyDialog, View v) {
                                 Toast.makeText(MainActivity.this, "点击了btn_1", Toast.LENGTH_SHORT).show();
                             }
                         })
@@ -174,9 +175,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 iv_1.setImageResource(R.mipmap.ic_launcher);
                             }
                         })
-                        .onClick(R.id.btn_1, new View.OnClickListener() {
+                        .onClick(R.id.btn_1,new OnDialogClickListener() {
                             @Override
-                            public void onClick(View v) {
+                            public void onClick(AnyDialog anyDialog, View v) {
                                 Toast.makeText(MainActivity.this, "点击了btn_1", Toast.LENGTH_SHORT).show();
                             }
                         })

@@ -9,10 +9,7 @@ import android.net.Uri;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 
 /**
  * 创建Bitmap 的帮助类
@@ -47,7 +44,7 @@ public final class BitmapUtils {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-            setInSampleSize(options);
+            setInSampleSize(context, options);
             options.inJustDecodeBounds = false;
         }
         try {
@@ -57,24 +54,6 @@ public final class BitmapUtils {
             e.printStackTrace();
             return null;
         }
-    }
-
-    /**
-     * 从路径创建图片
-     *
-     * @param path      路径
-     * @param fitScreen 是否适应屏幕宽度，设为true时将缩放图片到临近屏幕宽高（取缩小倍数最大的），false时返回原图
-     * @return Bitmap
-     */
-    public static Bitmap createFromPath(String path, boolean fitScreen) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        if (fitScreen) {
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(path, options);
-            setInSampleSize(options);
-            options.inJustDecodeBounds = false;
-        }
-        return BitmapFactory.decodeFile(path, options);
     }
 
     /**
@@ -90,47 +69,11 @@ public final class BitmapUtils {
     /**
      * 从资源文件创建图片
      *
-     * @param resId     资源id
-     * @param fitScreen 是否适应屏幕宽度，设为true时将缩放图片到临近屏幕宽高（取缩小倍数最大的），false时返回原图
-     * @return Bitmap
-     */
-    public static Bitmap createFromRes(@DrawableRes int resId, boolean fitScreen) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        if (fitScreen) {
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeResource(Resources.getSystem(), resId, options);
-            setInSampleSize(options);
-            options.inJustDecodeBounds = false;
-        }
-        return BitmapFactory.decodeResource(Resources.getSystem(), resId, options);
-    }
-
-    /**
-     * 从资源文件创建图片
-     *
      * @param resId 资源id
      * @return Bitmap
      */
     public static Bitmap createFromRes(@DrawableRes int resId) {
         return BitmapFactory.decodeResource(Resources.getSystem(), resId);
-    }
-
-    /**
-     * 从字节数组创建图片
-     *
-     * @param bytes     字节数组
-     * @param fitScreen 是否适应屏幕宽度，设为true时将缩放图片到临近屏幕宽高（取缩小倍数最大的），false时返回原图
-     * @return Bitmap
-     */
-    public static Bitmap createFromBytes(byte[] bytes, boolean fitScreen) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        if (fitScreen) {
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-            setInSampleSize(options);
-            options.inJustDecodeBounds = false;
-        }
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
     }
 
     /**
@@ -143,84 +86,15 @@ public final class BitmapUtils {
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
-//    /**
-//     * 从 InputStream 中创建图片
-//     *
-//     * @param context   Context
-//     * @param is        InputStream
-//     * @param fitScreen 是否适应屏幕宽度，设为true时将缩放图片到临近屏幕宽高（取缩小倍数最大的），false时返回原图
-//     * @return Bitmap
-//     */
-//    public static Bitmap createFromStream(Context context, InputStream is, boolean fitScreen) {
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        if (fitScreen) {
-//            options.inJustDecodeBounds = true;
-//            BitmapFactory.decodeStream(is, null, options);
-//            setInSampleSize(context, options);
-//            options.inJustDecodeBounds = false;
-//        }
-//        return BitmapFactory.decodeStream(is, null, options);
-//    }
-
-    /**
-     * 从 InputStream 中创建图片
-     * 不能主线程中创建来自网络的流，流的读取为网络操作。
-     *
-     * @param is        InputStream
-     * @param fitScreen 是否适应屏幕宽度，设为true时将缩放图片到临近屏幕宽高（取缩小倍数最大的），false时返回原图
-     * @return Bitmap
-     */
-    public static Bitmap createFromStream(InputStream is, boolean fitScreen) {
-        Bitmap bitmap = null;
-        BufferedInputStream bis = null;
-        ByteArrayOutputStream baos = null;
-
-        try {
-            bis = new BufferedInputStream(is);
-            baos = new ByteArrayOutputStream();
-
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = bis.read(buffer, 0, buffer.length)) > 0) {
-                baos.write(buffer, 0, len);
-            }
-            byte[] bytes = baos.toByteArray();
-
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            if (fitScreen) {
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-                setInSampleSize(options);
-                options.inJustDecodeBounds = false;
-            }
-            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            IOUtils.close(bis);
-            IOUtils.close(baos);
-        }
-        return bitmap;
-    }
-
-    /**
-     * 从 InputStream 中创建图片
-     *
-     * @param is InputStream
-     * @return Bitmap
-     */
-    public static Bitmap createFromStream(InputStream is) {
-        return BitmapFactory.decodeStream(is);
-    }
-
     /**
      * 修改 BitmapFactory.Options 的 inSampleSize 值，进行图片缩小
      * 缩小图片到临近屏幕宽高（取缩小倍数最大的）
      *
+     * @param context
      * @param options BitmapFactory.Options
      */
-    private static void setInSampleSize(BitmapFactory.Options options) {
-        DisplayInfoUtils displayInfoUtils = DisplayInfoUtils.getInstance();
+    private static void setInSampleSize(Context context, BitmapFactory.Options options) {
+        DisplayInfoUtils displayInfoUtils = DisplayInfoUtils.getInstance(context);
         int displayWidth = displayInfoUtils.getWidthPixels();
         int displayHeight = displayInfoUtils.getHeightPixels();
         int widthSize = options.outWidth / displayWidth;
