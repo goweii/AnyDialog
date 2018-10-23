@@ -19,6 +19,20 @@
             android:text="全屏" />
 
         <TextView
+            android:id="@+id/tv_show_top"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="顶部" />
+
+        <TextView
+            android:id="@+id/tv_show_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="底部" />
+
+        <TextView
             android:id="@+id/tv_show_blur_bg"
             android:layout_width="match_parent"
             android:layout_height="50dp"

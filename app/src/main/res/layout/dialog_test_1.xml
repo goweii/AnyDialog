@@ -7,29 +7,12 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tv_1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@color/colorPrimary"
-        android:gravity="center"
-        tools:text="测试数据1" />
-
     <ImageView
         android:id="@+id/iv_1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:gravity="center"
         android:scaleType="centerCrop"
-        tools:src="@mipmap/ic_launcher" />
-
-    <Button
-        android:id="@+id/btn_1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:text="按钮1" />
+        android:src="@mipmap/ic_launcher" />
 
 </LinearLayout>

@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="15dp"
     app:cardBackgroundColor="#ffffff"
-    app:cardCornerRadius="5dp"
     app:cardElevation="0dp">
 
     <LinearLayout
@@ -66,40 +64,6 @@
                     android:textColor="#232323"
                     android:textSize="16sp"
                     android:text="关闭" />
-
-            </FrameLayout>
-
-            <View
-                android:id="@+id/view_line"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp"
-                android:background="#f3f3f3" />
-
-            <FrameLayout
-                android:id="@+id/fl_dialog_yes"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground">
-
-                <ImageView
-                    android:id="@+id/iv_dialog_yes"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:padding="16dp"
-                    android:src="@null" />
-
-                <TextView
-                    android:id="@+id/tv_dialog_yes"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:textColor="#232323"
-                    android:textSize="16sp"
-                    android:text="确定" />
 
             </FrameLayout>
 

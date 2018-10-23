@@ -1,5 +1,5 @@
 <resources>
-    <style name="DialogFullscreen" parent="@android:style/Theme.Dialog">
+    <style name="DialogFullscreen" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
     </style>

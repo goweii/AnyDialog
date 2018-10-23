@@ -18,9 +18,11 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -38,6 +40,7 @@ import pers.goweii.dialog.listener.OnDialogClickListener;
 import pers.goweii.dialog.utils.DisplayInfoUtils;
 import pers.goweii.dialog.utils.ScreenShotUtils;
 import pers.goweii.dialog.utils.SoftInputUtils;
+import pers.goweii.dialog.utils.StatusBarUtils;
 import pers.goweii.dialog.utils.blur.BlurUtils;
 
 /**
@@ -47,7 +50,7 @@ import pers.goweii.dialog.utils.blur.BlurUtils;
  * E-mail: goweii@163.com
  * GitHub: https://github.com/goweii
  */
-public class AnyDialog extends Dialog {
+public class AnyDialog extends AlertDialog {
 
     private final Context context;
     private final ViewHolder viewHolder;
@@ -59,6 +62,7 @@ public class AnyDialog extends Dialog {
     private int contentId = -1;
     private View contentView = null;
 
+    private float dimAmount = 0;
     private float backgroundBlurRadius = 0;
     @ColorInt
     private int backgroundColor = Color.TRANSPARENT;
@@ -132,30 +136,20 @@ public class AnyDialog extends Dialog {
         layoutParams.alpha = 1f;
         layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         layoutParams.height = DisplayInfoUtils.getInstance(context).getAppUsableScreenSize().y;
-
-        layoutParams.dimAmount = 0;
+        layoutParams.dimAmount = dimAmount;
         window.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         window.setAttributes(layoutParams);
 
         View decorView = window.getDecorView();
         decorView.setPadding(0, 0, 0, 0);
         decorView.setBackgroundColor(Color.TRANSPARENT);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.setStatusBarColor(Color.TRANSPARENT);
-        }
+        StatusBarUtils.translucentStatusBar(window);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_full_screen);
-
         initWindow();
 
         backgroundView = findViewById(R.id.iv_background);
@@ -165,6 +159,19 @@ public class AnyDialog extends Dialog {
 
         contentWrapper = findViewById(R.id.rl_content);
         if (contentWrapper != null) {
+            contentWrapper.post(new Runnable() {
+                @Override
+                public void run() {
+                    int appUsableScreenHeight = DisplayInfoUtils.getInstance(context).getAppUsableScreenSize().y;
+                    int[] locationOnScreen = new int[2];
+                    contentWrapper.getLocationOnScreen(locationOnScreen);
+                    if (locationOnScreen[1] > 0) {
+                        ViewGroup.LayoutParams params = contentWrapper.getLayoutParams();
+                        params.height = appUsableScreenHeight - locationOnScreen[1];
+                        contentWrapper.setLayoutParams(params);
+                    }
+                }
+            });
             initContentWrapper();
         }
 
@@ -387,6 +394,14 @@ public class AnyDialog extends Dialog {
 
     public AnyDialog backgroundDrawable(Drawable drawable) {
         backgroundDrawable = drawable;
+        return this;
+    }
+
+    /**
+     * @return AnyDialog
+     */
+    public AnyDialog dimAmount(@FloatRange(from = 0, to = 1) float dimAmount) {
+        this.dimAmount = dimAmount;
         return this;
     }
 

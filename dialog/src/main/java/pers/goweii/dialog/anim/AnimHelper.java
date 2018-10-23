@@ -36,12 +36,12 @@ public class AnimHelper {
     }
 
     public static void startZoomOutAnim(View target, long duration) {
-        target.setAlpha(1);
-        target.setScaleX(1);
-        target.setScaleY(1);
-        ObjectAnimator alpha = ObjectAnimator.ofFloat(target, "alpha", 1, 0);
-        ObjectAnimator scaleX = ObjectAnimator.ofFloat(target, "scaleX", 1, 0.618f);
-        ObjectAnimator scaleY = ObjectAnimator.ofFloat(target, "scaleY", 1, 0.618f);
+        float alphaLast = target.getAlpha();
+        float scaleXLast = target.getScaleX();
+        float scaleYLast = target.getScaleY();
+        ObjectAnimator alpha = ObjectAnimator.ofFloat(target, "alpha", alphaLast, 0);
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(target, "scaleX", scaleXLast, 0.618f);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(target, "scaleY", scaleYLast, 0.618f);
         AnimatorSet set = new AnimatorSet();
         set.playTogether(alpha, scaleX, scaleY);
         set.setInterpolator(new AccelerateInterpolator());
@@ -58,8 +58,8 @@ public class AnimHelper {
     }
 
     public static void startAlphaOutAnim(View target, long duration) {
-        target.setAlpha(1);
-        ObjectAnimator alpha = ObjectAnimator.ofFloat(target, "alpha", 1, 0);
+        float alphaLast = target.getAlpha();
+        ObjectAnimator alpha = ObjectAnimator.ofFloat(target, "alpha", alphaLast, 0);
         alpha.setDuration(duration);
         alpha.setInterpolator(new AccelerateInterpolator());
         alpha.start();
