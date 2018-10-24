@@ -30,12 +30,11 @@ public final class ScreenShotUtils {
         view.buildDrawingCache(true);
         view.destroyDrawingCache();
         Bitmap bmp = view.getDrawingCache();
-        DisplayInfoUtils displayInfoUtils = DisplayInfoUtils.getInstance(activity);
-        int width = displayInfoUtils.getWidthPixels();
-        int height = displayInfoUtils.getHeightPixels();
-        Bitmap bp = Bitmap.createBitmap(bmp, 0, 0, width, height);
-        bmp = null;
-        return bp;
+//        DisplayInfoUtils displayInfoUtils = DisplayInfoUtils.getInstance(activity);
+//        int width = displayInfoUtils.getWidthPixels();
+//        int height = displayInfoUtils.getHeightPixels();
+//        Bitmap bp = Bitmap.createBitmap(bmp, 0, 0, width, height);
+        return bmp;
     }
 
     /**

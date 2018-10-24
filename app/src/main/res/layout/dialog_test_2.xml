@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="15dp"
     app:cardBackgroundColor="#ffffff"
     app:cardCornerRadius="5dp"
-    app:cardElevation="0dp">
+    app:cardElevation="30dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,23 +20,22 @@
             android:gravity="center"
             android:textColor="#232323"
             android:textSize="16sp"
-            android:text="提示" />
+            android:text="说明" />
 
         <TextView
             android:id="@+id/tv_dialog_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="left"
             android:paddingLeft="20dp"
             android:paddingTop="28dp"
             android:paddingRight="20dp"
             android:paddingBottom="25dp"
             android:textColor="#232323"
             android:textSize="17sp"
-            android:text="Android高定制性，高易用性Dialog。\n链式调用；一行代码实现背景高斯模糊；可自定义进出场动画；可自由控制显示大小和位置" />
+            android:text="@string/dialog_msg" />
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="#f3f3f3"
@@ -48,6 +46,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:clickable="true"
                 android:background="?android:attr/selectableItemBackground">
 
                 <ImageView
@@ -81,6 +80,7 @@
                 android:id="@+id/fl_dialog_yes"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:clickable="true"
                 android:layout_weight="1"
                 android:background="?android:attr/selectableItemBackground">
 

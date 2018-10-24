@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        android:scaleType="centerCrop" />
+        android:scaleType="fitXY" />
 
     <RelativeLayout
         android:id="@+id/rl_content"

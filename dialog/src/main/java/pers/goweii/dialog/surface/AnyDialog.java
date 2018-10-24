@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.AnimRes;
@@ -18,11 +17,12 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.app.FragmentManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -32,11 +32,12 @@ import android.widget.RelativeLayout;
 
 import pers.goweii.dialog.R;
 import pers.goweii.dialog.anim.AnimHelper;
-import pers.goweii.dialog.base.IBackgroundAnim;
-import pers.goweii.dialog.base.IContentAnim;
+import pers.goweii.dialog.base.IAnim;
 import pers.goweii.dialog.base.IDataBinder;
 import pers.goweii.dialog.holder.ViewHolder;
 import pers.goweii.dialog.listener.OnDialogClickListener;
+import pers.goweii.dialog.listener.OnDialogDismissListener;
+import pers.goweii.dialog.listener.OnDialogShowListener;
 import pers.goweii.dialog.utils.DisplayInfoUtils;
 import pers.goweii.dialog.utils.ScreenShotUtils;
 import pers.goweii.dialog.utils.SoftInputUtils;
@@ -50,10 +51,12 @@ import pers.goweii.dialog.utils.blur.BlurUtils;
  * E-mail: goweii@163.com
  * GitHub: https://github.com/goweii
  */
-public class AnyDialog extends AlertDialog {
+public class AnyDialog extends Dialog {
 
     private final Context context;
     private final ViewHolder viewHolder;
+
+    private boolean isDismissing = false;
 
     private ImageView backgroundView;
     private RelativeLayout contentWrapper;
@@ -64,6 +67,7 @@ public class AnyDialog extends AlertDialog {
 
     private float dimAmount = 0;
     private float backgroundBlurRadius = 0;
+    private float backgroundBlurScale = 1;
     @ColorInt
     private int backgroundColor = Color.TRANSPARENT;
     private Drawable backgroundDrawable = null;
@@ -71,20 +75,23 @@ public class AnyDialog extends AlertDialog {
     @DrawableRes
     private int backgroundResource = -1;
 
-    private long backgroundAnimDuration = 100;
-    private long contentAnimDuration = 150;
+    private long backgroundAnimDuration = 200;
+    private long contentAnimDuration = 250;
 
-    private IBackgroundAnim backgroundAnim = null;
+    private IAnim backgroundAnim = null;
     private Animation backgroundInAnim = null;
     private Animation backgroundOutAnim = null;
-    private IContentAnim contentAnim = null;
+    private IAnim contentAnim = null;
     private Animation contentInAnim = null;
     private Animation contentOutAnim = null;
 
     private IDataBinder dataBinder = null;
 
     private int gravity = -1;
-    private boolean touchOutsideCancelable = true;
+    private boolean cancelableOnTouchOutside = true;
+
+    private OnDialogShowListener mOnDialogShowListener = null;
+    private OnDialogDismissListener mOnDialogDismissListener = null;
 
     private AnyDialog(@NonNull Context context) {
         super(context, R.style.DialogFullscreen);
@@ -99,10 +106,20 @@ public class AnyDialog extends AlertDialog {
     @Override
     public void show() {
         super.show();
+        if (mOnDialogShowListener != null) {
+            mOnDialogShowListener.onShowing();
+        }
     }
 
     @Override
     public void dismiss() {
+        if (isDismissing) {
+            return;
+        }
+        isDismissing = true;
+        if (mOnDialogDismissListener != null) {
+            mOnDialogDismissListener.onDismissing();
+        }
         startBackgroundOutAnim();
         startContentOutAnim();
         new Handler().postDelayed(new Runnable() {
@@ -116,8 +133,16 @@ public class AnyDialog extends AlertDialog {
                     contentView.setTranslationY(0);
                 }
                 AnyDialog.super.dismiss();
+                isDismissing = false;
+                if (mOnDialogDismissListener != null) {
+                    mOnDialogDismissListener.onDismissed();
+                }
             }
         }, getDuration());
+    }
+
+    public View getContentView() {
+        return contentView;
     }
 
     private long getDuration() {
@@ -159,19 +184,6 @@ public class AnyDialog extends AlertDialog {
 
         contentWrapper = findViewById(R.id.rl_content);
         if (contentWrapper != null) {
-            contentWrapper.post(new Runnable() {
-                @Override
-                public void run() {
-                    int appUsableScreenHeight = DisplayInfoUtils.getInstance(context).getAppUsableScreenSize().y;
-                    int[] locationOnScreen = new int[2];
-                    contentWrapper.getLocationOnScreen(locationOnScreen);
-                    if (locationOnScreen[1] > 0) {
-                        ViewGroup.LayoutParams params = contentWrapper.getLayoutParams();
-                        params.height = appUsableScreenHeight - locationOnScreen[1];
-                        contentWrapper.setLayoutParams(params);
-                    }
-                }
-            });
             initContentWrapper();
         }
 
@@ -182,20 +194,61 @@ public class AnyDialog extends AlertDialog {
         }
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            startContentInAnim();
-            startBackgroundInAnim();
-        }
-    }
-
-    public View getContentView() {
-        return contentView;
-    }
-
     private void initContentWrapper() {
+        contentWrapper.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                contentWrapper.getViewTreeObserver().removeOnPreDrawListener(this);
+                int[] locationOnScreen = new int[2];
+                contentWrapper.getLocationOnScreen(locationOnScreen);
+                int appUsableScreenWidth = DisplayInfoUtils.getInstance(context).getAppUsableScreenSize().x;
+                int appUsableScreenHeight = DisplayInfoUtils.getInstance(context).getAppUsableScreenSize().y;
+                ViewGroup.LayoutParams params1 = contentWrapper.getLayoutParams();
+                params1.width = appUsableScreenWidth - locationOnScreen[0];
+                params1.height = appUsableScreenHeight - locationOnScreen[1];
+                contentWrapper.setLayoutParams(params1);
+                ViewGroup.LayoutParams params2 = backgroundView.getLayoutParams();
+                params2.width = appUsableScreenWidth - locationOnScreen[0];
+                params2.height = appUsableScreenHeight - locationOnScreen[1];
+                backgroundView.setLayoutParams(params2);
+                if (backgroundBlurRadius > 0) {
+                    if (context instanceof Activity) {
+                        Activity activity = (Activity) context;
+                        Bitmap snapshot = ScreenShotUtils.snapshotWithStatusBar(activity);
+                        int w;
+                        if (params2.width > snapshot.getWidth() - locationOnScreen[0]) {
+                            w = snapshot.getWidth() - locationOnScreen[0];
+                        } else {
+                            w = params2.width;
+                        }
+                        int h;
+                        if (params2.height > snapshot.getHeight() - locationOnScreen[1]) {
+                            h = snapshot.getHeight() - locationOnScreen[1];
+                        } else {
+                            h = params2.height;
+                        }
+                        Bitmap original = Bitmap.createBitmap(snapshot, locationOnScreen[0], locationOnScreen[1], w, h);
+                        snapshot.recycle();
+                        Bitmap blur = BlurUtils.blur(context, original, backgroundBlurRadius, backgroundBlurScale);
+                        original.recycle();
+                        backgroundView.setScaleType(ImageView.ScaleType.FIT_START);
+                        backgroundView.setImageBitmap(blur);
+                        backgroundView.setColorFilter(backgroundColor);
+                    }
+                }
+                startContentInAnim();
+                startBackgroundInAnim();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mOnDialogShowListener != null) {
+                            mOnDialogShowListener.onShown();
+                        }
+                    }
+                }, getDuration());
+                return true;
+            }
+        });
         if (contentId != -1) {
             contentView = LayoutInflater.from(context).inflate(contentId, contentWrapper, false);
         }
@@ -207,13 +260,10 @@ public class AnyDialog extends AlertDialog {
         if (gravity != -1) {
             contentWrapper.setGravity(gravity);
         }
-        if (context instanceof Activity) {
-            SoftInputUtils.init((Activity) context).duration(200).raise(contentView);
-        }
     }
 
     private void initBackground() {
-        if (touchOutsideCancelable) {
+        if (cancelableOnTouchOutside) {
             backgroundView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -221,15 +271,7 @@ public class AnyDialog extends AlertDialog {
                 }
             });
         }
-        if (backgroundBlurRadius > 0) {
-            if (context instanceof Activity) {
-                Activity activity = (Activity) context;
-                Bitmap snapshot = ScreenShotUtils.snapshotWithStatusBar(activity);
-                Bitmap blur = BlurUtils.blur(context, snapshot, backgroundBlurRadius);
-                backgroundView.setImageBitmap(blur);
-                backgroundView.setColorFilter(backgroundColor);
-            }
-        } else {
+        if (backgroundBlurRadius <= 0) {
             backgroundView.setVisibility(View.VISIBLE);
             if (backgroundBitmap != null) {
                 backgroundView.setImageBitmap(backgroundBitmap);
@@ -294,7 +336,7 @@ public class AnyDialog extends AlertDialog {
         }
     }
 
-    public AnyDialog contentAnim(IContentAnim contentAnim) {
+    public AnyDialog contentAnim(IAnim contentAnim) {
         this.contentAnim = contentAnim;
         return this;
     }
@@ -321,7 +363,7 @@ public class AnyDialog extends AlertDialog {
         return this;
     }
 
-    public AnyDialog backgroundAnim(IBackgroundAnim backgroundAnim) {
+    public AnyDialog backgroundAnim(IAnim backgroundAnim) {
         this.backgroundAnim = backgroundAnim;
         return this;
     }
@@ -377,8 +419,13 @@ public class AnyDialog extends AlertDialog {
      * @param radius 模糊半径
      * @return AnyDialog
      */
-    public AnyDialog backgroundBlur(@FloatRange(from = 0, fromInclusive = false, to = 25) float radius) {
+    public AnyDialog backgroundBlurRadius(@FloatRange(from = 0, fromInclusive = false, to = 25) float radius) {
         backgroundBlurRadius = radius;
+        return this;
+    }
+
+    public AnyDialog backgroundBlurScale(@FloatRange(from = 1) float scale) {
+        backgroundBlurScale = scale;
         return this;
     }
 
@@ -398,6 +445,13 @@ public class AnyDialog extends AlertDialog {
     }
 
     /**
+     * 背景变暗程度
+     * 在刘海屏手机，Dialog无法全屏到刘海区域，所以ImageView背景层无法到刘海区域，
+     * 但是Window默认的dimAmount可以生效，考虑到大部分情况都只是需要背景变暗，不需要
+     * 显示一个图片或高斯模糊，所以增加这个参数控制
+     * 不要和其他backgroundXxx()方法同时使用
+     *
+     * @param dimAmount 变暗程度
      * @return AnyDialog
      */
     public AnyDialog dimAmount(@FloatRange(from = 0, to = 1) float dimAmount) {
@@ -406,7 +460,7 @@ public class AnyDialog extends AlertDialog {
     }
 
     /**
-     * 在调用了{@link #backgroundBitmap(Bitmap)}或者{@link #backgroundBlur(float)}方法后
+     * 在调用了{@link #backgroundBitmap(Bitmap)}或者{@link #backgroundBlurRadius(float)}方法后
      * 该颜色值将调用imageView.setColorFilter(backgroundColor)设置
      * 建议此时传入的颜色为半透明颜色
      *
@@ -423,14 +477,14 @@ public class AnyDialog extends AlertDialog {
         return this;
     }
 
-    public AnyDialog clickBackCancelable(boolean cancelable) {
+    public AnyDialog cancelableOnClickKeyBack(boolean cancelable) {
         setCancelable(cancelable);
         return this;
     }
 
-    public AnyDialog touchOutsideCancelable(boolean cancelable) {
+    public AnyDialog cancelableOnTouchOutside(boolean cancelable) {
         setCanceledOnTouchOutside(cancelable);
-        this.touchOutsideCancelable = cancelable;
+        this.cancelableOnTouchOutside = cancelable;
         return this;
     }
 
@@ -455,11 +509,46 @@ public class AnyDialog extends AlertDialog {
         return this;
     }
 
+    public AnyDialog onClick(OnDialogClickListener listener, @IdRes int... viewIds) {
+        if (viewIds == null || viewIds.length == 0) {
+            return this;
+        }
+        for (int viewId : viewIds) {
+            viewHolder.addOnClickListener(viewId, listener);
+        }
+        return this;
+    }
+
+    public AnyDialog onClickToDismiss(@IdRes int... viewIds) {
+        if (viewIds == null || viewIds.length == 0) {
+            return this;
+        }
+        for (int viewId : viewIds) {
+            viewHolder.addOnClickListener(viewId, new OnDialogClickListener() {
+                @Override
+                public void onClick(AnyDialog anyDialog, View v) {
+                    dismiss();
+                }
+            });
+        }
+        return this;
+    }
+
     public <V extends View> V getView(@IdRes int viewId) {
         return viewHolder.getView(viewId);
     }
 
     public ViewHolder getViewHolder() {
         return viewHolder;
+    }
+
+    public AnyDialog onDialogShowListener(OnDialogShowListener onDialogShowListener) {
+        mOnDialogShowListener = onDialogShowListener;
+        return this;
+    }
+
+    public AnyDialog onDialogDismissListener(OnDialogDismissListener onDialogDismissListener) {
+        mOnDialogDismissListener = onDialogDismissListener;
+        return this;
     }
 }

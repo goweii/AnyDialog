@@ -9,20 +9,20 @@ import android.view.View;
  * E-mail: goweii@163.com
  * GitHub: https://github.com/goweii
  */
-public interface IBackgroundAnim {
+public interface IAnim {
     /**
-     * 背景进入动画
+     * 进入动画
      *
-     * @param background 背景
+     * @param target 背景
      * @return 动画时长
      */
-    long inAnim(View background);
+    long inAnim(View target);
 
     /**
-     * 背景消失动画
+     * 消失动画
      *
-     * @param background 背景
+     * @param target 背景
      * @return 动画时长
      */
-    long outAnim(View background);
+    long outAnim(View target);
 }

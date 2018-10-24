@@ -7,7 +7,7 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.view.View;
 import android.view.ViewAnimationUtils;
-import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
 import pers.goweii.dialog.utils.DisplayInfoUtils;
@@ -44,7 +44,7 @@ public class AnimHelper {
         ObjectAnimator scaleY = ObjectAnimator.ofFloat(target, "scaleY", scaleYLast, 0.618f);
         AnimatorSet set = new AnimatorSet();
         set.playTogether(alpha, scaleX, scaleY);
-        set.setInterpolator(new AccelerateInterpolator());
+        set.setInterpolator(new DecelerateInterpolator());
         set.setDuration(duration);
         set.start();
     }
@@ -61,7 +61,7 @@ public class AnimHelper {
         float alphaLast = target.getAlpha();
         ObjectAnimator alpha = ObjectAnimator.ofFloat(target, "alpha", alphaLast, 0);
         alpha.setDuration(duration);
-        alpha.setInterpolator(new AccelerateInterpolator());
+        alpha.setInterpolator(new DecelerateInterpolator());
         alpha.start();
     }
 
@@ -84,7 +84,7 @@ public class AnimHelper {
         target.getLocationInWindow(location);
         float y = height + location[1];
         ObjectAnimator translationY = ObjectAnimator.ofFloat(target, "translationY", 0, -y);
-        translationY.setInterpolator(new AccelerateInterpolator());
+        translationY.setInterpolator(new DecelerateInterpolator());
         translationY.setDuration(duration);
         translationY.start();
     }
@@ -110,7 +110,7 @@ public class AnimHelper {
         ObjectAnimator translationY = ObjectAnimator.ofFloat(target, "translationY", 0, -y);
         AnimatorSet set = new AnimatorSet();
         set.playTogether(alpha, translationY);
-        set.setInterpolator(new AccelerateInterpolator());
+        set.setInterpolator(new DecelerateInterpolator());
         set.setDuration(duration);
         set.start();
     }
@@ -134,7 +134,7 @@ public class AnimHelper {
         target.getLocationInWindow(location);
         float y = h - location[1];
         ObjectAnimator translationY = ObjectAnimator.ofFloat(target, "translationY", 0, y);
-        translationY.setInterpolator(new AccelerateInterpolator());
+        translationY.setInterpolator(new DecelerateInterpolator());
         translationY.setDuration(duration);
         translationY.start();
     }
@@ -160,7 +160,7 @@ public class AnimHelper {
         ObjectAnimator translationY = ObjectAnimator.ofFloat(target, "translationY", 0, y);
         AnimatorSet set = new AnimatorSet();
         set.playTogether(alpha, translationY);
-        set.setInterpolator(new AccelerateInterpolator());
+        set.setInterpolator(new DecelerateInterpolator());
         set.setDuration(duration);
         set.start();
     }
@@ -184,7 +184,7 @@ public class AnimHelper {
         target.getLocationInWindow(location);
         float x = width + location[0];
         ObjectAnimator translationX = ObjectAnimator.ofFloat(target, "translationX", 0, -x);
-        translationX.setInterpolator(new AccelerateInterpolator());
+        translationX.setInterpolator(new DecelerateInterpolator());
         translationX.setDuration(duration);
         translationX.start();
     }
@@ -210,7 +210,7 @@ public class AnimHelper {
         ObjectAnimator translationX = ObjectAnimator.ofFloat(target, "translationX", 0, -x);
         AnimatorSet set = new AnimatorSet();
         set.playTogether(alpha, translationX);
-        set.setInterpolator(new AccelerateInterpolator());
+        set.setInterpolator(new DecelerateInterpolator());
         set.setDuration(duration);
         set.start();
     }
@@ -234,7 +234,7 @@ public class AnimHelper {
         target.getLocationInWindow(location);
         final float x = w - location[0];
         ObjectAnimator translationX = ObjectAnimator.ofFloat(target, "translationX", 0, x);
-        translationX.setInterpolator(new AccelerateInterpolator());
+        translationX.setInterpolator(new DecelerateInterpolator());
         translationX.setDuration(duration);
         translationX.start();
     }
@@ -260,7 +260,7 @@ public class AnimHelper {
         ObjectAnimator translationX = ObjectAnimator.ofFloat(target, "translationX", 0, x);
         AnimatorSet set = new AnimatorSet();
         set.playTogether(alpha, translationX);
-        set.setInterpolator(new AccelerateInterpolator());
+        set.setInterpolator(new DecelerateInterpolator());
         set.setDuration(duration);
         set.start();
     }
@@ -282,7 +282,7 @@ public class AnimHelper {
         int y = target.getMeasuredHeight();
         int r = (int) Math.sqrt(x * x + y * y);
         Animator animator = ViewAnimationUtils.createCircularReveal(target, centerX, centerY, r, 0);
-        animator.setInterpolator(new AccelerateInterpolator());
+        animator.setInterpolator(new DecelerateInterpolator());
         animator.setDuration(duration);
         animator.start();
     }
