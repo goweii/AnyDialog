@@ -17,7 +17,6 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +39,6 @@ import pers.goweii.dialog.listener.OnDialogDismissListener;
 import pers.goweii.dialog.listener.OnDialogShowListener;
 import pers.goweii.dialog.utils.DisplayInfoUtils;
 import pers.goweii.dialog.utils.ScreenShotUtils;
-import pers.goweii.dialog.utils.SoftInputUtils;
 import pers.goweii.dialog.utils.StatusBarUtils;
 import pers.goweii.dialog.utils.blur.BlurUtils;
 

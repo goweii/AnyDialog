@@ -1,5 +1,6 @@
 package pers.goweii.anydialog;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.tv_show_right_left).setOnClickListener(this);
         findViewById(R.id.tv_show_left_right_alpha).setOnClickListener(this);
         findViewById(R.id.tv_show_right_left_alpha).setOnClickListener(this);
+        findViewById(R.id.tv_show_reveal).setOnClickListener(this);
     }
 
     @Override
@@ -686,6 +688,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             @Override
                             public long outAnim(View content) {
                                 AnimHelper.startLeftAlphaOutAnim(content, ANIM_DURATION);
+                                return ANIM_DURATION;
+                            }
+                        })
+                        .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
+                            @Override
+                            public void onClick(AnyDialog anyDialog, View v) {
+                                anyDialog.dismiss();
+                            }
+                        })
+                        .onClick(R.id.fl_dialog_yes, new OnDialogClickListener() {
+                            @Override
+                            public void onClick(AnyDialog anyDialog, View v) {
+                                anyDialog.dismiss();
+                            }
+                        })
+                        .show();
+                break;
+            case R.id.tv_show_reveal:
+                AnyDialog.with(MainActivity.this)
+                        .contentView(R.layout.dialog_test_2)
+                        .dimAmount(0.5f)
+                        .cancelableOnTouchOutside(true)
+                        .cancelableOnClickKeyBack(true)
+                        .contentAnim(new IAnim() {
+                            @Override
+                            public long inAnim(View content) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    AnimHelper.startCircularRevealInAnim(content, content.getMeasuredWidth() / 2, content.getMeasuredHeight() / 2, ANIM_DURATION);
+                                }
+                                return ANIM_DURATION;
+                            }
+
+                            @Override
+                            public long outAnim(View content) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    AnimHelper.startCircularRevealOutAnim(content, content.getMeasuredWidth() / 2, content.getMeasuredHeight() / 2, ANIM_DURATION);
+                                }
                                 return ANIM_DURATION;
                             }
                         })

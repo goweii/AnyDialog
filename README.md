@@ -201,7 +201,7 @@ dependencies {
 
     进入动画执行完成
 
-- **onDialogDismissListener(OnDialogDismissListener onDialogDismissListener)****
+- **onDialogDismissListener(OnDialogDismissListener onDialogDismissListener)**
 
   dialog关闭的回调
 
