@@ -5,11 +5,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Toast;
 
-import pers.goweii.dialog.anim.AnimHelper;
-import pers.goweii.dialog.base.IAnim;
-import pers.goweii.dialog.listener.OnDialogClickListener;
-import pers.goweii.dialog.surface.AnyDialog;
+import per.goweii.anydialog.AnimHelper;
+import per.goweii.anydialog.AnyDialog;
+import per.goweii.anydialog.IAnim;
+import per.goweii.anydialog.OnDialogClickListener;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -119,23 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_blur_bg:
                 AnyDialog.with(MainActivity.this)
-                        .contentView(R.layout.dialog_test_2)
-                        .backgroundBlurRadius(20)
-                        .backgroundBlurScale(8)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
-                        .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
-                            @Override
-                            public void onClick(AnyDialog anyDialog, View v) {
-                                anyDialog.dismiss();
-                            }
-                        })
-                        .onClick(R.id.fl_dialog_yes, new OnDialogClickListener() {
-                            @Override
-                            public void onClick(AnyDialog anyDialog, View v) {
-                                anyDialog.dismiss();
-                            }
-                        })
+                        .contentView(R.layout.dialog_test_4)
                         .show();
                 break;
             case R.id.tv_show_dark_bg:

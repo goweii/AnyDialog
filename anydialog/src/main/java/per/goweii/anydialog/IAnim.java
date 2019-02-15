@@ -1,4 +1,4 @@
-package pers.goweii.dialog.base;
+package per.goweii.anydialog;
 
 import android.view.View;
 

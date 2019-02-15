@@ -1,6 +1,4 @@
-package pers.goweii.dialog.base;
-
-import pers.goweii.dialog.surface.AnyDialog;
+package per.goweii.anydialog;
 
 /**
  * @author CuiZhen

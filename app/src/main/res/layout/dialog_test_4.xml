@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="#ffffff"
+    android:layout_margin="60dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="0dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:gravity="center"
+        android:textColor="#232323"
+        android:textSize="16sp"
+        android:text="因高斯模糊背景效果无法适配所有机型，现已删除。可用本人的另一个框架AnyLayer实现" />
+
+</android.support.v7.widget.CardView>
