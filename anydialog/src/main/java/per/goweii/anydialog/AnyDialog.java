@@ -1,7 +1,9 @@
 package per.goweii.anydialog;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
@@ -14,6 +16,7 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -56,6 +59,9 @@ public class AnyDialog extends Dialog {
     private OnDialogShowListener mOnDialogShowListener = null;
     private OnDialogDismissListener mOnDialogDismissListener = null;
     private OnDialogVisibleChangeListener mOnDialogVisibleChangeListener = null;
+
+    private boolean insideStatusBar = false;
+    private boolean insideNavigationBar = false;
 
     private AnyDialog(@NonNull Context context) {
         super(context);
@@ -176,6 +182,16 @@ public class AnyDialog extends Dialog {
         return this;
     }
 
+    public AnyDialog insideStatusBar(boolean insideStatusBar) {
+        this.insideStatusBar = insideStatusBar;
+        return this;
+    }
+
+    public AnyDialog insideNavigationBar(boolean insideNavigationBar) {
+        this.insideNavigationBar = insideNavigationBar;
+        return this;
+    }
+
     /**
      * {@link android.view.Gravity}
      *
@@ -238,7 +254,7 @@ public class AnyDialog extends Dialog {
         return mViewHolder;
     }
 
-    public FrameLayout getContainer(){
+    public FrameLayout getContainer() {
         return mViewHolder.getContainer();
     }
 
@@ -336,17 +352,74 @@ public class AnyDialog extends Dialog {
     }
 
     private void initContent() {
-        if (mViewHolder.getContent() != null) {
-            mViewHolder.getContent().setFocusable(true);
-            mViewHolder.getContent().setClickable(true);
-            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mViewHolder.getContent().getLayoutParams();
-            if (gravity != -1) {
-                params.gravity = gravity;
-            } else if (params.gravity == FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY) {
-                params.gravity = Gravity.CENTER;
-            }
-            mViewHolder.getContainer().addView(mViewHolder.getContent());
+        if (mViewHolder.getContent() == null) {
+            return;
         }
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mViewHolder.getContent().getLayoutParams();
+        if (gravity != -1) {
+            params.gravity = gravity;
+        } else if (params.gravity == FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY) {
+            params.gravity = Gravity.CENTER;
+        }
+        if (params.width == FrameLayout.LayoutParams.MATCH_PARENT) {
+            params.gravity |= Gravity.LEFT;
+        }
+        if (params.height == FrameLayout.LayoutParams.MATCH_PARENT) {
+            params.gravity |= Gravity.TOP;
+        }
+        if (insideStatusBar) {
+            params.topMargin += getStatusBarHeight();
+        }
+        if (insideNavigationBar) {
+            Activity activity = getActivity();
+            if (activity != null) {
+                final View activityDecor = activity.getWindow().getDecorView();
+                final View activityContent = activityDecor.findViewById(android.R.id.content);
+                int[] activityDecorLocation = new int[2];
+                activityDecor.getLocationOnScreen(activityDecorLocation);
+                final int adLeft = activityDecorLocation[0];
+                final int adTop = activityDecorLocation[1];
+                final int adRight = adLeft + activityDecor.getWidth();
+                final int adBottom = adTop + activityDecor.getHeight();
+                int[] activityContentLocation = new int[2];
+                activityContent.getLocationOnScreen(activityContentLocation);
+                final int acLeft = activityContentLocation[0];
+                final int acTop = activityContentLocation[1];
+                final int acRight = acLeft + activityContent.getWidth();
+                final int acBottom = acTop + activityContent.getHeight();
+                params.leftMargin += acLeft - adLeft;
+                params.rightMargin += -(acRight - adRight);
+                params.bottomMargin += -(acBottom - adBottom);
+            }
+        }
+        mViewHolder.getContent().setFocusable(true);
+        mViewHolder.getContent().setClickable(true);
+        mViewHolder.getContainer().addView(mViewHolder.getContent());
+    }
+
+    /**
+     * 从当前上下文获取Activity
+     */
+    @Nullable
+    private Activity getActivity() {
+        if (mContext instanceof Activity) {
+            return (Activity) mContext;
+        }
+        if (mContext instanceof ContextWrapper) {
+            Context baseContext = ((ContextWrapper) mContext).getBaseContext();
+            if (baseContext instanceof Activity) {
+                return (Activity) baseContext;
+            }
+        }
+        return null;
+    }
+
+    private int getStatusBarHeight() {
+        int resourceId = mContext.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return mContext.getResources().getDimensionPixelSize(resourceId);
+        }
+        return 0;
     }
 
     private void startBackgroundInAnim() {

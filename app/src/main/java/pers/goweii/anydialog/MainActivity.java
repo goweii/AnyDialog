@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import per.goweii.anydialog.AnimHelper;
@@ -16,6 +17,8 @@ import per.goweii.anydialog.OnDialogClickListener;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final long ANIM_DURATION = 350;
+    private CheckBox cb_inside_status_bar;
+    private CheckBox cb_inside_navigation_bar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView() {
+        cb_inside_status_bar = findViewById(R.id.cb_inside_status_bar);
+        cb_inside_navigation_bar = findViewById(R.id.cb_inside_navigation_bar);
         findViewById(R.id.tv_show_full).setOnClickListener(this);
         findViewById(R.id.tv_show_top).setOnClickListener(this);
         findViewById(R.id.tv_show_bottom).setOnClickListener(this);
@@ -57,19 +62,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_full:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_1)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .onClickToDismiss(R.id.iv_1)
                         .show();
                 break;
             case R.id.tv_show_top:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_3)
-                        .dimAmount(0.5f)
                         .gravity(Gravity.TOP)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -93,11 +97,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_bottom:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_3)
-                        .dimAmount(0.5f)
                         .gravity(Gravity.BOTTOM)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -121,15 +124,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_blur_bg:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_4)
                         .show();
                 break;
             case R.id.tv_show_dark_bg:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
                             @Override
                             public void onClick(AnyDialog anyDialog, View v) {
@@ -146,9 +150,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_tran_bg:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
+                        .dimAmount(0)
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
                             @Override
                             public void onClick(AnyDialog anyDialog, View v) {
@@ -165,10 +170,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_bottom_in:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -198,10 +202,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_bottom_alpha_in:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -231,10 +234,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_top_in:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -264,10 +266,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_top_alpha_in:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -297,10 +298,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_top_bottom:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -330,10 +330,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_bottom_top:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -363,10 +362,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_top_bottom_alpha:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -396,10 +394,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_bottom_top_alpha:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -429,10 +426,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_left_in:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -462,10 +458,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_left_alpha_in:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -495,10 +490,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_right_in:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -528,10 +522,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_right_alpha_in:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -561,10 +554,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_left_right:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -594,10 +586,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_right_left:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -627,10 +618,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_left_right_alpha:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -660,10 +650,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_right_left_alpha:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {
@@ -693,10 +682,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.tv_show_reveal:
                 AnyDialog.with(MainActivity.this)
+                        .insideStatusBar(cb_inside_status_bar.isChecked())
+                        .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0.5f)
-                        .cancelableOnTouchOutside(true)
-                        .cancelableOnClickKeyBack(true)
                         .contentAnim(new IAnim() {
                             @Override
                             public long inAnim(View content) {

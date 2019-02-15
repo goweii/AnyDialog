@@ -11,6 +11,27 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/cb_inside_status_bar"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="空出状态栏"/>
+
+            <CheckBox
+                android:id="@+id/cb_inside_navigation_bar"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="空出导航栏"/>
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tv_show_full"
             android:layout_width="match_parent"
