@@ -340,24 +340,6 @@ public class AnyDialog extends Dialog {
         mViewHolder.getContainer().addView(mViewHolder.getContent());
     }
 
-    private AnimatorSet createInAnim() {
-        Animator contentInAnimator = null;
-        if (contentAnim != null) {
-            contentInAnimator = contentAnim.inAnim(mViewHolder.getContent());
-        }
-        if (contentInAnimator == null) {
-            contentInAnimator = AnimHelper.createZoomInAnim(mViewHolder.getContent());
-        }
-        if (contentInAnimator.getDuration() < 0) {
-            contentInAnimator.setDuration(ANIM_DURATION_DEFAULT);
-        }
-        Animator backgroundInAnim = AnimHelper.createAlphaInAnim(mViewHolder.getBackground());
-        backgroundInAnim.setDuration(contentInAnimator.getDuration());
-        AnimatorSet inAnim = new AnimatorSet();
-        inAnim.playTogether(contentInAnimator, backgroundInAnim);
-        return inAnim;
-    }
-
     private void startInAnim() {
         if (mInAnim != null && mInAnim.isRunning()) {
             return;
@@ -382,6 +364,7 @@ public class AnyDialog extends Dialog {
 
             @Override
             public void onAnimationCancel(Animator animation) {
+                mInAnim = null;
             }
 
             @Override
@@ -391,22 +374,22 @@ public class AnyDialog extends Dialog {
         mInAnim.start();
     }
 
-    private AnimatorSet createOutAnim() {
-        Animator contentOutAnimator = null;
+    private AnimatorSet createInAnim() {
+        Animator contentInAnimator = null;
         if (contentAnim != null) {
-            contentOutAnimator = contentAnim.outAnim(mViewHolder.getContent());
+            contentInAnimator = contentAnim.inAnim(mViewHolder.getContent());
         }
-        if (contentOutAnimator == null) {
-            contentOutAnimator = AnimHelper.createZoomOutAnim(mViewHolder.getContent());
+        if (contentInAnimator == null) {
+            contentInAnimator = AnimHelper.createZoomInAnim(mViewHolder.getContent());
         }
-        if (contentOutAnimator.getDuration() < 0) {
-            contentOutAnimator.setDuration(ANIM_DURATION_DEFAULT);
+        if (contentInAnimator.getDuration() < 0) {
+            contentInAnimator.setDuration(ANIM_DURATION_DEFAULT);
         }
-        Animator backgroundOutAnim = AnimHelper.createAlphaOutAnim(mViewHolder.getBackground());
-        backgroundOutAnim.setDuration(contentOutAnimator.getDuration());
-        AnimatorSet outAnim = new AnimatorSet();
-        outAnim.playTogether(contentOutAnimator, backgroundOutAnim);
-        return outAnim;
+        Animator backgroundInAnim = AnimHelper.createAlphaInAnim(mViewHolder.getBackground());
+        backgroundInAnim.setDuration(contentInAnimator.getDuration());
+        AnimatorSet inAnim = new AnimatorSet();
+        inAnim.playTogether(contentInAnimator, backgroundInAnim);
+        return inAnim;
     }
 
     private void startOutAnim() {
@@ -437,6 +420,7 @@ public class AnyDialog extends Dialog {
 
             @Override
             public void onAnimationCancel(Animator animation) {
+                mOutAnim = null;
             }
 
             @Override
@@ -444,6 +428,24 @@ public class AnyDialog extends Dialog {
             }
         });
         mOutAnim.start();
+    }
+
+    private AnimatorSet createOutAnim() {
+        Animator contentOutAnimator = null;
+        if (contentAnim != null) {
+            contentOutAnimator = contentAnim.outAnim(mViewHolder.getContent());
+        }
+        if (contentOutAnimator == null) {
+            contentOutAnimator = AnimHelper.createZoomOutAnim(mViewHolder.getContent());
+        }
+        if (contentOutAnimator.getDuration() < 0) {
+            contentOutAnimator.setDuration(ANIM_DURATION_DEFAULT);
+        }
+        Animator backgroundOutAnim = AnimHelper.createAlphaOutAnim(mViewHolder.getBackground());
+        backgroundOutAnim.setDuration(contentOutAnimator.getDuration());
+        AnimatorSet outAnim = new AnimatorSet();
+        outAnim.playTogether(contentOutAnimator, backgroundOutAnim);
+        return outAnim;
     }
 
     /**
