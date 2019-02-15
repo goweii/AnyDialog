@@ -1,5 +1,7 @@
 package per.goweii.anydialog;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -8,8 +10,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.AnimRes;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.FloatRange;
@@ -23,8 +23,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -37,19 +35,17 @@ import android.widget.ImageView;
  */
 public class AnyDialog extends Dialog {
 
+    private static final long ANIM_DURATION_DEFAULT = 300L;
+
     private final ViewHolder mViewHolder;
     private final Context mContext;
 
-    private boolean isDismissing = false;
-
-    private float dimAmount = 0.3F;
+    private float dimAmount = 0.382F;
     private int backgroundColorInt = Color.BLACK;
 
     private IAnim contentAnim = null;
-    private Animation contentInAnim = null;
-    private Animation contentOutAnim = null;
-    private long contentInAnimDuration = 300;
-    private long contentOutAnimDuration = 300;
+    private AnimatorSet mInAnim = null;
+    private AnimatorSet mOutAnim = null;
 
     private IDataBinder dataBinder = null;
 
@@ -80,52 +76,11 @@ public class AnyDialog extends Dialog {
 
     @Override
     public void dismiss() {
-        if (isDismissing) {
-            return;
-        }
-        isDismissing = true;
-        if (mOnDialogDismissListener != null) {
-            mOnDialogDismissListener.onDismissing(AnyDialog.this);
-        }
-        startBackgroundOutAnim();
-        startContentOutAnim();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                AnyDialog.super.dismiss();
-                isDismissing = false;
-                if (mOnDialogDismissListener != null) {
-                    mOnDialogDismissListener.onDismissed(AnyDialog.this);
-                }
-                if (mOnDialogVisibleChangeListener != null) {
-                    mOnDialogVisibleChangeListener.onDismiss(AnyDialog.this);
-                }
-            }
-        }, contentOutAnimDuration);
+        startOutAnim();
     }
 
     public AnyDialog contentAnim(IAnim contentAnim) {
         this.contentAnim = contentAnim;
-        return this;
-    }
-
-    public AnyDialog contentInAnim(@AnimRes int anim) {
-        return contentInAnim(AnimationUtils.loadAnimation(mContext, anim));
-    }
-
-    public AnyDialog contentInAnim(@NonNull Animation anim) {
-        contentInAnim = anim;
-        contentInAnimDuration = contentInAnim.getDuration();
-        return this;
-    }
-
-    public AnyDialog contentOutAnim(@AnimRes int anim) {
-        return contentOutAnim(AnimationUtils.loadAnimation(mContext, anim));
-    }
-
-    public AnyDialog contentOutAnim(@NonNull Animation anim) {
-        contentOutAnim = anim;
-        contentOutAnimDuration = Math.max(contentOutAnimDuration, contentOutAnim.getDuration());
         return this;
     }
 
@@ -328,19 +283,7 @@ public class AnyDialog extends Dialog {
         mViewHolder.getContainer().post(new Runnable() {
             @Override
             public void run() {
-                if (mOnDialogShowListener != null) {
-                    mOnDialogShowListener.onShowing(AnyDialog.this);
-                }
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mOnDialogShowListener != null) {
-                            mOnDialogShowListener.onShown(AnyDialog.this);
-                        }
-                    }
-                }, contentInAnimDuration);
-                startBackgroundInAnim();
-                startContentInAnim();
+                startInAnim();
             }
         });
     }
@@ -397,6 +340,112 @@ public class AnyDialog extends Dialog {
         mViewHolder.getContainer().addView(mViewHolder.getContent());
     }
 
+    private AnimatorSet createInAnim() {
+        Animator contentInAnimator = null;
+        if (contentAnim != null) {
+            contentInAnimator = contentAnim.inAnim(mViewHolder.getContent());
+        }
+        if (contentInAnimator == null) {
+            contentInAnimator = AnimHelper.createZoomInAnim(mViewHolder.getContent());
+        }
+        if (contentInAnimator.getDuration() < 0) {
+            contentInAnimator.setDuration(ANIM_DURATION_DEFAULT);
+        }
+        Animator backgroundInAnim = AnimHelper.createAlphaInAnim(mViewHolder.getBackground());
+        backgroundInAnim.setDuration(contentInAnimator.getDuration());
+        AnimatorSet inAnim = new AnimatorSet();
+        inAnim.playTogether(contentInAnimator, backgroundInAnim);
+        return inAnim;
+    }
+
+    private void startInAnim() {
+        if (mInAnim != null && mInAnim.isRunning()) {
+            return;
+        }
+        mInAnim = createInAnim();
+        mInAnim.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                if (mOnDialogShowListener != null) {
+                    mOnDialogShowListener.onShowing(AnyDialog.this);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mInAnim.cancel();
+                mInAnim = null;
+                if (mOnDialogShowListener != null) {
+                    mOnDialogShowListener.onShown(AnyDialog.this);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
+        mInAnim.start();
+    }
+
+    private AnimatorSet createOutAnim() {
+        Animator contentOutAnimator = null;
+        if (contentAnim != null) {
+            contentOutAnimator = contentAnim.outAnim(mViewHolder.getContent());
+        }
+        if (contentOutAnimator == null) {
+            contentOutAnimator = AnimHelper.createZoomOutAnim(mViewHolder.getContent());
+        }
+        if (contentOutAnimator.getDuration() < 0) {
+            contentOutAnimator.setDuration(ANIM_DURATION_DEFAULT);
+        }
+        Animator backgroundOutAnim = AnimHelper.createAlphaOutAnim(mViewHolder.getBackground());
+        backgroundOutAnim.setDuration(contentOutAnimator.getDuration());
+        AnimatorSet outAnim = new AnimatorSet();
+        outAnim.playTogether(contentOutAnimator, backgroundOutAnim);
+        return outAnim;
+    }
+
+    private void startOutAnim() {
+        if (mOutAnim != null && mOutAnim.isRunning()) {
+            return;
+        }
+        mOutAnim = createOutAnim();
+        mOutAnim.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                if (mOnDialogDismissListener != null) {
+                    mOnDialogDismissListener.onDismissing(AnyDialog.this);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                AnyDialog.super.dismiss();
+                mOutAnim.cancel();
+                mOutAnim = null;
+                if (mOnDialogDismissListener != null) {
+                    mOnDialogDismissListener.onDismissed(AnyDialog.this);
+                }
+                if (mOnDialogVisibleChangeListener != null) {
+                    mOnDialogVisibleChangeListener.onDismiss(AnyDialog.this);
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
+        mOutAnim.start();
+    }
+
     /**
      * 从当前上下文获取Activity
      */
@@ -420,37 +469,5 @@ public class AnyDialog extends Dialog {
             return mContext.getResources().getDimensionPixelSize(resourceId);
         }
         return 0;
-    }
-
-    private void startBackgroundInAnim() {
-        AnimHelper.startAlphaInAnim(mViewHolder.getBackground(), contentInAnimDuration);
-    }
-
-    private void startContentInAnim() {
-        if (contentAnim != null) {
-            contentInAnimDuration = contentAnim.inAnim(mViewHolder.getContent());
-        } else {
-            if (contentInAnim != null) {
-                mViewHolder.getContent().startAnimation(contentInAnim);
-            } else {
-                AnimHelper.startZoomInAnim(mViewHolder.getContent(), contentInAnimDuration);
-            }
-        }
-    }
-
-    private void startBackgroundOutAnim() {
-        AnimHelper.startAlphaOutAnim(mViewHolder.getBackground(), contentOutAnimDuration);
-    }
-
-    private void startContentOutAnim() {
-        if (contentAnim != null) {
-            contentOutAnimDuration = contentAnim.outAnim(mViewHolder.getContent());
-        } else {
-            if (contentOutAnim != null) {
-                mViewHolder.getContent().startAnimation(contentOutAnim);
-            } else {
-                AnimHelper.startZoomOutAnim(mViewHolder.getContent(), contentOutAnimDuration);
-            }
-        }
     }
 }

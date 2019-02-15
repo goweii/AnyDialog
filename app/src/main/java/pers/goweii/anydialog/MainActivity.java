@@ -1,5 +1,6 @@
 package pers.goweii.anydialog;
 
+import android.animation.Animator;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -76,15 +77,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .gravity(Gravity.TOP)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startTopInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                               return AnimHelper.createTopInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startTopOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createTopOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -103,15 +102,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .gravity(Gravity.BOTTOM)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startBottomInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createBottomInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startBottomOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createBottomOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -175,15 +172,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startBottomInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createBottomInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startBottomOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createBottomOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -207,15 +202,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startBottomAlphaInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createBottomAlphaInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startBottomAlphaOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createBottomAlphaOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -239,15 +232,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startTopInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createTopInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startTopOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createTopOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -271,15 +262,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startTopAlphaInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createTopAlphaInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startTopAlphaOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createTopAlphaOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -303,15 +292,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startTopInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createTopInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startBottomOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createBottomOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -335,15 +322,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startBottomInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createBottomInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startTopOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createTopOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -367,15 +352,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startTopAlphaInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createTopAlphaInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startBottomAlphaOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createBottomAlphaOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -399,15 +382,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startBottomAlphaInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createBottomAlphaInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startTopAlphaOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createTopAlphaOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -431,15 +412,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startLeftInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createLeftInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startLeftOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createLeftOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -463,15 +442,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startLeftAlphaInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createLeftAlphaInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startLeftAlphaOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createLeftAlphaOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -495,15 +472,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startRightInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createRightInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startRightOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createRightOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -527,15 +502,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startRightAlphaInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createRightAlphaInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startRightAlphaOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createRightAlphaOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -559,15 +532,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startLeftInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createLeftInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startRightOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createRightOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -591,15 +562,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startRightInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createRightInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startLeftOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createLeftOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -623,15 +592,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startLeftAlphaInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createLeftAlphaInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startRightAlphaOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createRightAlphaOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -655,15 +622,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
-                                AnimHelper.startRightAlphaInAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator inAnim(View content) {
+                                return AnimHelper.createRightAlphaInAnim(content);
                             }
 
                             @Override
-                            public long outAnim(View content) {
-                                AnimHelper.startLeftAlphaOutAnim(content, ANIM_DURATION);
-                                return ANIM_DURATION;
+                            public Animator outAnim(View content) {
+                                return AnimHelper.createLeftAlphaOutAnim(content);
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
@@ -687,19 +652,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .contentView(R.layout.dialog_test_2)
                         .contentAnim(new IAnim() {
                             @Override
-                            public long inAnim(View content) {
+                            public Animator inAnim(View content) {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                    AnimHelper.startCircularRevealInAnim(content, content.getMeasuredWidth() / 2, content.getMeasuredHeight() / 2, ANIM_DURATION);
+                                    return AnimHelper.createCircularRevealInAnim(content, content.getMeasuredWidth() / 2, content.getMeasuredHeight() / 2);
                                 }
-                                return ANIM_DURATION;
+                                return null;
                             }
 
                             @Override
-                            public long outAnim(View content) {
+                            public Animator outAnim(View content) {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                    AnimHelper.startCircularRevealOutAnim(content, content.getMeasuredWidth() / 2, content.getMeasuredHeight() / 2, ANIM_DURATION);
+                                   return AnimHelper.createCircularRevealOutAnim(content, content.getMeasuredWidth() / 2, content.getMeasuredHeight() / 2);
                                 }
-                                return ANIM_DURATION;
+                                return null;
                             }
                         })
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {

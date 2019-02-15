@@ -1,5 +1,6 @@
 package per.goweii.anydialog;
 
+import android.animation.Animator;
 import android.view.View;
 
 /**
@@ -16,7 +17,7 @@ public interface IAnim {
      * @param target 背景
      * @return 动画时长
      */
-    long inAnim(View target);
+    Animator inAnim(View target);
 
     /**
      * 消失动画
@@ -24,5 +25,5 @@ public interface IAnim {
      * @param target 背景
      * @return 动画时长
      */
-    long outAnim(View target);
+    Animator outAnim(View target);
 }
