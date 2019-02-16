@@ -6,7 +6,6 @@ package per.goweii.anydialog;
  * @author Cuizhen
  * @date 2018/10/24
  */
-public interface OnDialogDismissListener {
-    void onDismissing(AnyDialog anyDialog);
+public interface OnDialogDismissedListener {
     void onDismissed(AnyDialog anyDialog);
 }

@@ -1,6 +1,7 @@
 package pers.goweii.anydialog;
 
 import android.animation.Animator;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -123,6 +124,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 AnyDialog.with(MainActivity.this)
                         .insideStatusBar(cb_inside_status_bar.isChecked())
                         .insideNavigationBar(cb_inside_navigation_bar.isChecked())
+                        .backgroundBlurPercent(0.5f)
+                        .backgroundColorInt(Color.BLUE)
+                        .backgroundDimAmount(0.3F)
                         .contentView(R.layout.dialog_test_4)
                         .show();
                 break;
@@ -150,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .insideStatusBar(cb_inside_status_bar.isChecked())
                         .insideNavigationBar(cb_inside_navigation_bar.isChecked())
                         .contentView(R.layout.dialog_test_2)
-                        .dimAmount(0)
+                        .backgroundDimAmount(0)
                         .onClick(R.id.fl_dialog_no, new OnDialogClickListener() {
                             @Override
                             public void onClick(AnyDialog anyDialog, View v) {

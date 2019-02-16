@@ -6,7 +6,6 @@ package per.goweii.anydialog;
  * @author Cuizhen
  * @date 2018/10/24
  */
-public interface OnDialogShowListener {
-    void onShowing(AnyDialog anyDialog);
+public interface OnDialogShownListener {
     void onShown(AnyDialog anyDialog);
 }

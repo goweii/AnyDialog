@@ -5,8 +5,9 @@ import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.ContextWrapper;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,7 +17,6 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -25,6 +25,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import per.goweii.anydialog.blur.BlurUtils;
 
 /**
  * @author CuiZhen
@@ -40,33 +42,40 @@ public class AnyDialog extends Dialog {
     private final ViewHolder mViewHolder;
     private final Context mContext;
 
-    private float dimAmount = 0.382F;
-    private int backgroundColorInt = Color.BLACK;
+    private float mBackgroundDimAmount = -1;
+    private int mBackgroundColorInt = -1;
+    private float mBackgroundBlurPercent = 0;
+    private float mBackgroundBlurRadius = 0;
+    private float mBackgroundBlurScale = 2;
 
-    private IAnim contentAnim = null;
+    private IAnim mContentAnim = null;
     private AnimatorSet mInAnim = null;
     private AnimatorSet mOutAnim = null;
 
-    private IDataBinder dataBinder = null;
+    private int mGravity = -1;
+    private boolean mCancelableOnTouchOutside = true;
 
-    private int gravity = -1;
-    private boolean cancelableOnTouchOutside = true;
+    private boolean mInsideStatusBar = false;
+    private boolean mInsideNavigationBar = false;
 
-    private OnDialogShowListener mOnDialogShowListener = null;
-    private OnDialogDismissListener mOnDialogDismissListener = null;
-    private OnDialogVisibleChangeListener mOnDialogVisibleChangeListener = null;
+    private int[] mInsideParamsOff = new int[]{0, 0, 0, 0};
 
-    private boolean insideStatusBar = false;
-    private boolean insideNavigationBar = false;
+    private IDataBinder mDataBinder = null;
+
+    private OnDialogCreatedListener mOnDialogCreatedListener = null;
+    private OnDialogEnterListener mOnDialogEnterListener = null;
+    private OnDialogShownListener mOnDialogShownListener = null;
+    private OnDialogExitListener mOnDialogExitListener = null;
+    private OnDialogDismissedListener mOnDialogDismissedListener = null;
+
+    public static AnyDialog with(@NonNull Context context) {
+        return new AnyDialog(context);
+    }
 
     private AnyDialog(@NonNull Context context) {
         super(context);
         this.mContext = context;
         this.mViewHolder = new ViewHolder(this);
-    }
-
-    public static AnyDialog with(@NonNull Context context) {
-        return new AnyDialog(context);
     }
 
     @Override
@@ -76,11 +85,11 @@ public class AnyDialog extends Dialog {
 
     @Override
     public void dismiss() {
-        startOutAnim();
+        onDialogExit();
     }
 
     public AnyDialog contentAnim(IAnim contentAnim) {
-        this.contentAnim = contentAnim;
+        this.mContentAnim = contentAnim;
         return this;
     }
 
@@ -99,8 +108,8 @@ public class AnyDialog extends Dialog {
      * @param dimAmount 变暗程度
      * @return AnyDialog
      */
-    public AnyDialog dimAmount(@FloatRange(from = 0, to = 1) float dimAmount) {
-        this.dimAmount = dimAmount;
+    public AnyDialog backgroundDimAmount(@FloatRange(from = 0, to = 1) float dimAmount) {
+        this.mBackgroundDimAmount = dimAmount;
         return this;
     }
 
@@ -111,7 +120,7 @@ public class AnyDialog extends Dialog {
      * @return AnyDialog
      */
     public AnyDialog backgroundColorInt(@ColorInt int colorInt) {
-        this.backgroundColorInt = colorInt;
+        this.mBackgroundColorInt = colorInt;
         return this;
     }
 
@@ -122,7 +131,22 @@ public class AnyDialog extends Dialog {
      * @return AnyDialog
      */
     public AnyDialog backgroundColorRes(@ColorRes int colorRes) {
-        this.backgroundColorInt = ContextCompat.getColor(mContext, colorRes);
+        this.mBackgroundColorInt = ContextCompat.getColor(mContext, colorRes);
+        return this;
+    }
+
+    public AnyDialog backgroundBlurPercent(float backgroundBlurPercent) {
+        mBackgroundBlurPercent = backgroundBlurPercent;
+        return this;
+    }
+
+    public AnyDialog backgroundBlurRadius(float backgroundBlurRadius) {
+        mBackgroundBlurRadius = backgroundBlurRadius;
+        return this;
+    }
+
+    public AnyDialog backgroundBlurScale(float backgroundBlurScale) {
+        mBackgroundBlurScale = backgroundBlurScale;
         return this;
     }
 
@@ -133,17 +157,17 @@ public class AnyDialog extends Dialog {
 
     public AnyDialog cancelableOnTouchOutside(boolean cancelable) {
         setCanceledOnTouchOutside(cancelable);
-        this.cancelableOnTouchOutside = cancelable;
+        this.mCancelableOnTouchOutside = cancelable;
         return this;
     }
 
     public AnyDialog insideStatusBar(boolean insideStatusBar) {
-        this.insideStatusBar = insideStatusBar;
+        this.mInsideStatusBar = insideStatusBar;
         return this;
     }
 
     public AnyDialog insideNavigationBar(boolean insideNavigationBar) {
-        this.insideNavigationBar = insideNavigationBar;
+        this.mInsideNavigationBar = insideNavigationBar;
         return this;
     }
 
@@ -154,12 +178,12 @@ public class AnyDialog extends Dialog {
      * @return AnyDialog
      */
     public AnyDialog gravity(int gravity) {
-        this.gravity = gravity;
+        this.mGravity = gravity;
         return this;
     }
 
     public AnyDialog bindData(IDataBinder dataBinder) {
-        this.dataBinder = dataBinder;
+        this.mDataBinder = dataBinder;
         return this;
     }
 
@@ -187,18 +211,29 @@ public class AnyDialog extends Dialog {
         }, viewIds);
     }
 
-    public AnyDialog onDialogShowListener(OnDialogShowListener onDialogShowListener) {
-        mOnDialogShowListener = onDialogShowListener;
+    public AnyDialog onDialogCreatedListener(OnDialogCreatedListener onDialogCreatedListener) {
+        mOnDialogCreatedListener = onDialogCreatedListener;
         return this;
     }
 
-    public AnyDialog onDialogDismissListener(OnDialogDismissListener onDialogDismissListener) {
-        mOnDialogDismissListener = onDialogDismissListener;
+    public AnyDialog setOnDialogEnterListener(OnDialogEnterListener onDialogEnterListener) {
+        mOnDialogEnterListener = onDialogEnterListener;
         return this;
     }
 
-    public void onDialogVisibleChangeListener(OnDialogVisibleChangeListener onDialogVisibleChangeListener) {
-        mOnDialogVisibleChangeListener = onDialogVisibleChangeListener;
+    public AnyDialog setOnDialogShownListener(OnDialogShownListener onDialogShownListener) {
+        mOnDialogShownListener = onDialogShownListener;
+        return this;
+    }
+
+    public AnyDialog setOnDialogExitListener(OnDialogExitListener onDialogExitListener) {
+        mOnDialogExitListener = onDialogExitListener;
+        return this;
+    }
+
+    public AnyDialog setOnDialogDismissedListener(OnDialogDismissedListener onDialogDismissedListener) {
+        mOnDialogDismissedListener = onDialogDismissedListener;
+        return this;
     }
 
     public <V extends View> V getView(@IdRes int viewId) {
@@ -219,6 +254,21 @@ public class AnyDialog extends Dialog {
 
     public View getContentView() {
         return mViewHolder.getContent();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(mViewHolder.getContainer());
+        initWindow();
+
+        initContainer();
+        calculateInsideParamsOff();
+        initBackground();
+        initContent();
+        mViewHolder.bindListener();
+
+        onDialogCreated();
     }
 
     private void initWindow() {
@@ -249,30 +299,50 @@ public class AnyDialog extends Dialog {
         decorView.setBackgroundColor(Color.TRANSPARENT);
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(mViewHolder.getContainer());
-
-        initWindow();
-
-        initContainer();
-        initBackground();
-        initContent();
-
-        mViewHolder.bindListener();
-
-        if (mOnDialogVisibleChangeListener != null) {
-            mOnDialogVisibleChangeListener.onShow(AnyDialog.this);
+    protected void onDialogCreated() {
+        if (mOnDialogCreatedListener != null) {
+            mOnDialogCreatedListener.onCreated(AnyDialog.this);
         }
-        if (dataBinder != null) {
-            dataBinder.bind(this);
+        if (mDataBinder != null) {
+            mDataBinder.bind(AnyDialog.this);
+        }
+        mViewHolder.getContainer().post(new Runnable() {
+            @Override
+            public void run() {
+                onDialogEnter();
+            }
+        });
+    }
+
+    protected void onDialogEnter() {
+        if (mOnDialogEnterListener != null) {
+            mOnDialogEnterListener.onEnter(AnyDialog.this);
+        }
+        startInAnim();
+    }
+
+    protected void onDialogShown() {
+        if (mOnDialogShownListener != null) {
+            mOnDialogShownListener.onShown(AnyDialog.this);
+        }
+    }
+
+    protected void onDialogExit() {
+        if (mOnDialogExitListener != null) {
+            mOnDialogExitListener.onExit(AnyDialog.this);
+        }
+        startOutAnim();
+    }
+
+    protected void onDialogDismissed() {
+        AnyDialog.super.dismiss();
+        if (mOnDialogDismissedListener != null) {
+            mOnDialogDismissedListener.onDismissed(AnyDialog.this);
         }
     }
 
     private void initContainer() {
-        if (cancelableOnTouchOutside) {
+        if (mCancelableOnTouchOutside) {
             mViewHolder.getContainer().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -280,18 +350,57 @@ public class AnyDialog extends Dialog {
                 }
             });
         }
-        mViewHolder.getContainer().post(new Runnable() {
-            @Override
-            public void run() {
-                startInAnim();
-            }
-        });
     }
 
     private void initBackground() {
-        ColorDrawable colorDrawable = new ColorDrawable(backgroundColorInt);
-        colorDrawable.setAlpha((int) (dimAmount * 255));
-        mViewHolder.getBackground().setImageDrawable(colorDrawable);
+        if (mBackgroundBlurPercent > 0 || mBackgroundBlurRadius > 0) {
+            Activity activity = Utils.getActivity(mContext);
+            if (activity != null) {
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mViewHolder.getBackground().getLayoutParams();
+                params.leftMargin += mInsideParamsOff[0];
+                params.rightMargin += mInsideParamsOff[2];
+                params.bottomMargin += mInsideParamsOff[3];
+                final View activityDecor = activity.getWindow().getDecorView();
+                Bitmap decorBitmap = Utils.snapshot(activityDecor);
+                int x = mInsideParamsOff[0];
+                int y = 0;
+                int w = decorBitmap.getWidth() - x - mInsideParamsOff[2];
+                int h = decorBitmap.getHeight() - y - mInsideParamsOff[3];
+                Bitmap cutBitmap = Bitmap.createBitmap(decorBitmap, x, y, w, h);
+                decorBitmap.recycle();
+                Bitmap blurBitmap = null;
+                if (mBackgroundBlurPercent > 0) {
+                    blurBitmap = BlurUtils.blurByPercent(mContext, cutBitmap, mBackgroundBlurPercent, mBackgroundBlurScale);
+                } else if (mBackgroundBlurRadius > 0) {
+                    blurBitmap = BlurUtils.blur(mContext, cutBitmap, mBackgroundBlurRadius, mBackgroundBlurScale);
+                }
+                if (blurBitmap != null) {
+                    BitmapDrawable blurDrawable = new BitmapDrawable(mContext.getResources(), blurBitmap);
+                    if (mBackgroundColorInt == -1) {
+                        mBackgroundColorInt = Color.TRANSPARENT;
+                    }
+                    if (mBackgroundDimAmount == -1) {
+                        mBackgroundDimAmount = 0;
+                    }
+                    mViewHolder.getBackground().setImageDrawable(blurDrawable);
+                    mViewHolder.getBackground().setColorFilter(Utils.alphaColor(mBackgroundColorInt, mBackgroundDimAmount));
+                }
+            }
+        } else {
+            if (mBackgroundColorInt == -1) {
+                mBackgroundColorInt = Color.BLACK;
+                if (mBackgroundDimAmount == -1) {
+                    mBackgroundDimAmount = 0.382F;
+                }
+            } else {
+                if (mBackgroundDimAmount == -1) {
+                    mBackgroundDimAmount = 0;
+                }
+            }
+            ColorDrawable colorDrawable = new ColorDrawable(mBackgroundColorInt);
+            colorDrawable.setAlpha((int) (mBackgroundDimAmount * 255));
+            mViewHolder.getBackground().setImageDrawable(colorDrawable);
+        }
     }
 
     private void initContent() {
@@ -299,8 +408,8 @@ public class AnyDialog extends Dialog {
             return;
         }
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mViewHolder.getContent().getLayoutParams();
-        if (gravity != -1) {
-            params.gravity = gravity;
+        if (mGravity != -1) {
+            params.gravity = mGravity;
         } else if (params.gravity == FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY) {
             params.gravity = Gravity.CENTER;
         }
@@ -310,34 +419,41 @@ public class AnyDialog extends Dialog {
         if (params.height == FrameLayout.LayoutParams.MATCH_PARENT) {
             params.gravity |= Gravity.TOP;
         }
-        if (insideStatusBar) {
-            params.topMargin += getStatusBarHeight();
+        if (mInsideStatusBar) {
+            params.topMargin += mInsideParamsOff[1];
         }
-        if (insideNavigationBar) {
-            Activity activity = getActivity();
-            if (activity != null) {
-                final View activityDecor = activity.getWindow().getDecorView();
-                final View activityContent = activityDecor.findViewById(android.R.id.content);
-                int[] activityDecorLocation = new int[2];
-                activityDecor.getLocationOnScreen(activityDecorLocation);
-                final int adLeft = activityDecorLocation[0];
-                final int adTop = activityDecorLocation[1];
-                final int adRight = adLeft + activityDecor.getWidth();
-                final int adBottom = adTop + activityDecor.getHeight();
-                int[] activityContentLocation = new int[2];
-                activityContent.getLocationOnScreen(activityContentLocation);
-                final int acLeft = activityContentLocation[0];
-                final int acTop = activityContentLocation[1];
-                final int acRight = acLeft + activityContent.getWidth();
-                final int acBottom = acTop + activityContent.getHeight();
-                params.leftMargin += acLeft - adLeft;
-                params.rightMargin += -(acRight - adRight);
-                params.bottomMargin += -(acBottom - adBottom);
-            }
+        if (mInsideNavigationBar) {
+            params.leftMargin += mInsideParamsOff[0];
+            params.rightMargin += mInsideParamsOff[2];
+            params.bottomMargin += mInsideParamsOff[3];
         }
         mViewHolder.getContent().setFocusable(true);
         mViewHolder.getContent().setClickable(true);
         mViewHolder.getContainer().addView(mViewHolder.getContent());
+    }
+
+    private void calculateInsideParamsOff() {
+        mInsideParamsOff[1] = Utils.getStatusBarHeight(mContext);
+        Activity activity = Utils.getActivity(mContext);
+        if (activity != null) {
+            final View activityDecor = activity.getWindow().getDecorView();
+            final View activityContent = activityDecor.findViewById(android.R.id.content);
+            int[] activityDecorLocation = new int[2];
+            activityDecor.getLocationOnScreen(activityDecorLocation);
+            final int adLeft = activityDecorLocation[0];
+            final int adTop = activityDecorLocation[1];
+            final int adRight = adLeft + activityDecor.getWidth();
+            final int adBottom = adTop + activityDecor.getHeight();
+            int[] activityContentLocation = new int[2];
+            activityContent.getLocationOnScreen(activityContentLocation);
+            final int acLeft = activityContentLocation[0];
+            final int acTop = activityContentLocation[1];
+            final int acRight = acLeft + activityContent.getWidth();
+            final int acBottom = acTop + activityContent.getHeight();
+            mInsideParamsOff[0] = acLeft - adLeft;
+            mInsideParamsOff[2] = -(acRight - adRight);
+            mInsideParamsOff[3] = -(acBottom - adBottom);
+        }
     }
 
     private void startInAnim() {
@@ -348,18 +464,12 @@ public class AnyDialog extends Dialog {
         mInAnim.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                if (mOnDialogShowListener != null) {
-                    mOnDialogShowListener.onShowing(AnyDialog.this);
-                }
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                mInAnim.cancel();
                 mInAnim = null;
-                if (mOnDialogShowListener != null) {
-                    mOnDialogShowListener.onShown(AnyDialog.this);
-                }
+                onDialogShown();
             }
 
             @Override
@@ -376,8 +486,8 @@ public class AnyDialog extends Dialog {
 
     private AnimatorSet createInAnim() {
         Animator contentInAnimator = null;
-        if (contentAnim != null) {
-            contentInAnimator = contentAnim.inAnim(mViewHolder.getContent());
+        if (mContentAnim != null) {
+            contentInAnimator = mContentAnim.inAnim(mViewHolder.getContent());
         }
         if (contentInAnimator == null) {
             contentInAnimator = AnimHelper.createZoomInAnim(mViewHolder.getContent());
@@ -400,22 +510,12 @@ public class AnyDialog extends Dialog {
         mOutAnim.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                if (mOnDialogDismissListener != null) {
-                    mOnDialogDismissListener.onDismissing(AnyDialog.this);
-                }
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                AnyDialog.super.dismiss();
-                mOutAnim.cancel();
                 mOutAnim = null;
-                if (mOnDialogDismissListener != null) {
-                    mOnDialogDismissListener.onDismissed(AnyDialog.this);
-                }
-                if (mOnDialogVisibleChangeListener != null) {
-                    mOnDialogVisibleChangeListener.onDismiss(AnyDialog.this);
-                }
+                onDialogDismissed();
             }
 
             @Override
@@ -432,8 +532,8 @@ public class AnyDialog extends Dialog {
 
     private AnimatorSet createOutAnim() {
         Animator contentOutAnimator = null;
-        if (contentAnim != null) {
-            contentOutAnimator = contentAnim.outAnim(mViewHolder.getContent());
+        if (mContentAnim != null) {
+            contentOutAnimator = mContentAnim.outAnim(mViewHolder.getContent());
         }
         if (contentOutAnimator == null) {
             contentOutAnimator = AnimHelper.createZoomOutAnim(mViewHolder.getContent());
@@ -446,30 +546,5 @@ public class AnyDialog extends Dialog {
         AnimatorSet outAnim = new AnimatorSet();
         outAnim.playTogether(contentOutAnimator, backgroundOutAnim);
         return outAnim;
-    }
-
-    /**
-     * 从当前上下文获取Activity
-     */
-    @Nullable
-    private Activity getActivity() {
-        if (mContext instanceof Activity) {
-            return (Activity) mContext;
-        }
-        if (mContext instanceof ContextWrapper) {
-            Context baseContext = ((ContextWrapper) mContext).getBaseContext();
-            if (baseContext instanceof Activity) {
-                return (Activity) baseContext;
-            }
-        }
-        return null;
-    }
-
-    private int getStatusBarHeight() {
-        int resourceId = mContext.getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            return mContext.getResources().getDimensionPixelSize(resourceId);
-        }
-        return 0;
     }
 }
