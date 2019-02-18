@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.support.annotation.ColorInt;
 import android.support.annotation.FloatRange;
 import android.support.annotation.Nullable;
+import android.view.PixelCopy;
 import android.view.View;
 
 /**
@@ -49,6 +50,7 @@ class Utils {
         view.setDrawingCacheEnabled(true);
         view.buildDrawingCache(true);
         view.destroyDrawingCache();
+        view.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
         return view.getDrawingCache();
     }
 

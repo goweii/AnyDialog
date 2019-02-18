@@ -26,7 +26,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import per.goweii.anydialog.blur.BlurUtils;
+import per.goweii.burred.Blurred;
 
 /**
  * @author CuiZhen
@@ -76,6 +76,7 @@ public class AnyDialog extends Dialog {
         super(context);
         this.mContext = context;
         this.mViewHolder = new ViewHolder(this);
+        Blurred.init(mContext);
     }
 
     @Override
@@ -368,12 +369,16 @@ public class AnyDialog extends Dialog {
                 int h = decorBitmap.getHeight() - y - mInsideParamsOff[3];
                 Bitmap cutBitmap = Bitmap.createBitmap(decorBitmap, x, y, w, h);
                 decorBitmap.recycle();
-                Bitmap blurBitmap = null;
+                Blurred blurred = Blurred.with(cutBitmap)
+                        .recycleOriginal(true)
+                        .keepSize(false)
+                        .scale(mBackgroundBlurScale);
                 if (mBackgroundBlurPercent > 0) {
-                    blurBitmap = BlurUtils.blurByPercent(mContext, cutBitmap, mBackgroundBlurPercent, mBackgroundBlurScale);
+                    blurred.percent(mBackgroundBlurPercent);
                 } else if (mBackgroundBlurRadius > 0) {
-                    blurBitmap = BlurUtils.blur(mContext, cutBitmap, mBackgroundBlurRadius, mBackgroundBlurScale);
+                    blurred.radius(mBackgroundBlurRadius);
                 }
+                Bitmap blurBitmap = blurred.blur();
                 if (blurBitmap != null) {
                     BitmapDrawable blurDrawable = new BitmapDrawable(mContext.getResources(), blurBitmap);
                     if (mBackgroundColorInt == -1) {

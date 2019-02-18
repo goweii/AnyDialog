@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 AnyDialog.with(MainActivity.this)
                         .insideStatusBar(cb_inside_status_bar.isChecked())
                         .insideNavigationBar(cb_inside_navigation_bar.isChecked())
-                        .backgroundBlurPercent(0.5f)
+                        .backgroundBlurPercent(0.05f)
                         .backgroundColorInt(Color.BLUE)
                         .backgroundDimAmount(0.3F)
                         .contentView(R.layout.dialog_test_4)
