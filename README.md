@@ -52,6 +52,8 @@ allprojects {
 - ### 添加依赖
 
   [点击查看最新版本号](https://github.com/goweii/AnyDialog/releases)
+  
+  从3.0.3版本开始，版本号前不加v，引用时需要注意。
 
 ```java
 // build.gradle(Module:)
