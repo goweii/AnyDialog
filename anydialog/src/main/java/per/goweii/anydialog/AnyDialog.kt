@@ -26,6 +26,8 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     private var fullscreen: Boolean? = null
     private var width: Int? = null
     private var height: Int? = null
+    private var horizontalMargin: Float = 0F
+    private var verticalMargin: Float = 0F
 
     private var content: View? = null
 
@@ -34,12 +36,24 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
         window?.let { w ->
             val contentParent = w.decorView.findViewById<ViewGroup>(Window.ID_ANDROID_CONTENT)
             content = layoutInflater.inflate(getLayoutRes(), contentParent, false)
+            initAttributes()
+            content?.let { setContentView(it) }
             initWindow(w)
-            content?.let {
-                setContentView(it)
-            }
         }
         initView()
+    }
+
+    private fun initAttributes() {
+        content?.let {
+            val params = it.layoutParams
+            if (params is FrameLayout.LayoutParams) {
+                if (gravity == null) gravity = params.gravity
+                if (width == null) width = params.width
+                if (height == null) height = params.height
+                horizontalMargin = max(params.leftMargin, params.rightMargin).toFloat()
+                verticalMargin = max(params.topMargin, params.bottomMargin).toFloat()
+            }
+        }
     }
 
     protected open fun initWindow(window: Window) {
@@ -50,26 +64,18 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
             window.statusBarColor = Color.TRANSPARENT
         }
         val attr = window.attributes
-        content?.let {
-            val params = it.layoutParams
-            if (params is FrameLayout.LayoutParams) {
-                attr.gravity = params.gravity
-                attr.width = params.width
-                attr.height = params.height
-                attr.horizontalMargin = max(params.leftMargin, params.rightMargin).toFloat()
-                attr.verticalMargin = max(params.topMargin, params.bottomMargin).toFloat()
-            }
-        }
         gravity()?.let { attr.gravity = it }
+        width()?.let { attr.width = it }
+        height()?.let { attr.height = it }
         fullscreen()?.let {
             if (it) {
                 attr.width = WindowManager.LayoutParams.MATCH_PARENT
                 attr.height = WindowManager.LayoutParams.MATCH_PARENT
-            } else {
-                width()?.let { attr.width = it }
-                height()?.let { attr.height = it }
             }
         }
+        attr.horizontalMargin = horizontalMargin
+        attr.verticalMargin = verticalMargin
+        window.attributes = attr
         if (dimBehind()) {
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         } else {
@@ -77,7 +83,6 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
         }
         dimAmount()?.let { window.setDimAmount(it) }
         window.setWindowAnimations(animation())
-        window.attributes = attr
         val decorView: View = window.decorView
         decorView.setPadding(0, 0, 0, 0)
         decorView.setBackgroundColor(Color.TRANSPARENT)
