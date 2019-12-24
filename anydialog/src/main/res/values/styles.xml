@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Dialog" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+    </style>
+
+    <style name="DialogAnimDef" parent="android:Animation.Dialog">
+    </style>
+
+    <style name="DialogAnimBottom" parent="android:Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/anydialog_bottom_enter</item>
+        <item name="android:windowExitAnimation">@anim/anydialog_bottom_exit</item>
+    </style>
+
+    <style name="DialogAnimTop" parent="android:Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/anydialog_top_enter</item>
+        <item name="android:windowExitAnimation">@anim/anydialog_top_exit</item>
+    </style>
+
+    <style name="DialogAnimLeft" parent="android:Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/anydialog_left_enter</item>
+        <item name="android:windowExitAnimation">@anim/anydialog_left_exit</item>
+    </style>
+
+    <style name="DialogAnimRight" parent="android:Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/anydialog_right_enter</item>
+        <item name="android:windowExitAnimation">@anim/anydialog_right_exit</item>
+    </style>
+
+</resources>
