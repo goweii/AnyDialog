@@ -14,4 +14,28 @@
         android:layout_height="wrap_content"
         android:text="普通弹窗"/>
 
+    <Button
+        android:id="@+id/btn_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="顶部弹窗"/>
+
+    <Button
+        android:id="@+id/btn_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="底部弹窗"/>
+
+    <Button
+        android:id="@+id/btn_left"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="左侧弹窗"/>
+
+    <Button
+        android:id="@+id/btn_right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="右侧弹窗"/>
+
 </LinearLayout>
