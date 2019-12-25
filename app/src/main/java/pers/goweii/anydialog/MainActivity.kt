@@ -11,6 +11,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        btn_full.setOnClickListener {
+            AnyDialog(this).apply {
+                style(AnyDialog.Style.CENTER)
+                fullscreen(true)
+                contentView(R.layout.dialog_def)
+                clickDismiss(R.id.tv_close)
+            }.show()
+        }
         btn_def.setOnClickListener {
             AnyDialog(this).apply {
                 style(AnyDialog.Style.CENTER)
