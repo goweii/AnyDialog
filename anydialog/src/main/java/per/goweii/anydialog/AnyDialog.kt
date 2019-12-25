@@ -3,14 +3,15 @@ package per.goweii.anydialog
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
+import android.support.annotation.CallSuper
 import android.support.annotation.FloatRange
 import android.support.annotation.LayoutRes
 import android.support.annotation.StyleRes
 import android.view.*
 import android.widget.FrameLayout
-import kotlin.math.max
 
 open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
@@ -26,44 +27,71 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     private var fullscreen: Boolean? = null
     private var width: Int? = null
     private var height: Int? = null
-    private var horizontalMargin: Float = 0F
-    private var verticalMargin: Float = 0F
+    private var horizontalMargin: Float? = null
+    private var verticalMargin: Float? = null
 
-    private var content: View? = null
+    private lateinit var content: View
 
+    @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window?.let { w ->
-            val contentParent = w.decorView.findViewById<ViewGroup>(Window.ID_ANDROID_CONTENT)
-            content = layoutInflater.inflate(getLayoutRes(), contentParent, false)
-            initAttributes()
-            content?.let { setContentView(it) }
-            initWindow(w)
-        }
-        initView()
+        val contentParent = checkNotNull(window).decorView.findViewById<ViewGroup>(Window.ID_ANDROID_CONTENT)
+        content = onCreateView(contentParent, savedInstanceState)
+        onViewCreated(content, savedInstanceState)
+        setContentView(content)
+        onViewAttached(content, savedInstanceState)
     }
 
-    private fun initAttributes() {
-        content?.let {
-            val params = it.layoutParams
-            if (params is FrameLayout.LayoutParams) {
-                if (gravity == null) gravity = params.gravity
-                if (width == null) width = params.width
-                if (height == null) height = params.height
-                horizontalMargin = max(params.leftMargin, params.rightMargin).toFloat()
-                verticalMargin = max(params.topMargin, params.bottomMargin).toFloat()
+    protected open fun onCreateView(parent: ViewGroup, savedInstanceState: Bundle?): View {
+        return layoutInflater.inflate(getLayoutRes(), parent, false)
+    }
+
+    @CallSuper
+    protected open fun onViewCreated(contentView: View, savedInstanceState: Bundle?) {
+        val params = contentView.layoutParams
+        if (params is FrameLayout.LayoutParams) {
+            if (gravity == null) {
+                if (params.gravity != Gravity.NO_GRAVITY) {
+                    gravity = params.gravity
+                }
+            }
+            val size = Point()
+            checkNotNull(window).windowManager.defaultDisplay.getSize(size)
+            if (width == null) {
+                width = if (params.width == ViewGroup.LayoutParams.MATCH_PARENT) {
+                    if (params.leftMargin == 0 && params.rightMargin == 0) {
+                        params.width
+                    } else {
+                        size.x - params.leftMargin - params.rightMargin
+                    }
+                } else {
+                    params.width
+                }
+            }
+            if (height == null) {
+                height = if (params.height == ViewGroup.LayoutParams.MATCH_PARENT) {
+                    if (params.topMargin == 0 && params.bottomMargin == 0) {
+                        params.height
+                    } else {
+                        size.y - params.topMargin - params.bottomMargin
+                    }
+                } else {
+                    params.height
+                }
             }
         }
     }
 
-    protected open fun initWindow(window: Window) {
+    @CallSuper
+    protected open fun onViewAttached(contentView: View, savedInstanceState: Bundle?) {
+        val w = checkNotNull(window)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.statusBarColor = Color.TRANSPARENT
+            w.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            w.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            w.statusBarColor = Color.TRANSPARENT
         }
-        val attr = window.attributes
+        val attr = w.attributes
         gravity()?.let { attr.gravity = it }
         width()?.let { attr.width = it }
         height()?.let { attr.height = it }
@@ -73,22 +101,17 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
                 attr.height = WindowManager.LayoutParams.MATCH_PARENT
             }
         }
-        attr.horizontalMargin = horizontalMargin
-        attr.verticalMargin = verticalMargin
-        window.attributes = attr
+        w.attributes = attr
         if (dimBehind()) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            w.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         } else {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            w.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         }
-        dimAmount()?.let { window.setDimAmount(it) }
-        window.setWindowAnimations(animation())
-        val decorView: View = window.decorView
+        dimAmount()?.let { w.setDimAmount(it) }
+        w.setWindowAnimations(animation())
+        val decorView: View = w.decorView
         decorView.setPadding(0, 0, 0, 0)
         decorView.setBackgroundColor(Color.TRANSPARENT)
-    }
-
-    protected open fun initView() {
     }
 
     protected open fun getLayoutRes() = layoutRes
@@ -108,14 +131,18 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     protected open fun height(): Int? = height
 
+    protected open fun horizontalMargin(): Float? = horizontalMargin
+
+    protected open fun verticalMargin(): Float? = verticalMargin
+
     fun contentView(layoutRes: Int): AnyDialog {
         this.layoutRes = layoutRes
         return this
     }
 
     fun style(style: Style): AnyDialog {
-        this.gravity = style.gravity
         this.animRes = style.animRes
+        this.gravity = style.gravity
         this.width = style.width
         this.height = style.height
         return this
@@ -181,24 +208,24 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     }
 
     enum class Style(
-            val gravity: Int,
             val animRes: Int,
+            val gravity: Int,
             val width: Int,
             val height: Int
     ) {
-        DEFAULT(Gravity.CENTER, R.style.DialogAnimDef,
+        DEFAULT(R.style.DialogAnimDef, Gravity.CENTER,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT),
-        BOTTOM(Gravity.BOTTOM, R.style.DialogAnimBottom,
+        BOTTOM(R.style.DialogAnimBottom, Gravity.BOTTOM,
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT),
-        TOP(Gravity.TOP, R.style.DialogAnimTop,
+        TOP(R.style.DialogAnimTop, Gravity.TOP,
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT),
-        LEFT(Gravity.LEFT, R.style.DialogAnimLeft,
+        LEFT(R.style.DialogAnimLeft, Gravity.LEFT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.MATCH_PARENT),
-        RIGHT(Gravity.RIGHT, R.style.DialogAnimRight,
+        RIGHT(R.style.DialogAnimRight, Gravity.RIGHT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.MATCH_PARENT)
     }

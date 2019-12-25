@@ -13,7 +13,6 @@ class MainActivity : AppCompatActivity() {
         btn_def.setOnClickListener {
             AnyDialog(this).apply {
                 contentView(R.layout.dialog_def)
-                style(AnyDialog.Style.DEFAULT)
             }.show()
         }
     }
