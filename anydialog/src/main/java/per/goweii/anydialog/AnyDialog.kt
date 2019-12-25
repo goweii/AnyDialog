@@ -6,14 +6,13 @@ import android.graphics.Color
 import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
-import android.support.annotation.CallSuper
-import android.support.annotation.FloatRange
-import android.support.annotation.LayoutRes
-import android.support.annotation.StyleRes
+import androidx.annotation.*
 import android.view.*
 import android.widget.FrameLayout
 
 open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
+
+    private val viewHolder = ViewHolder()
 
     @LayoutRes
     private var layoutRes: Int = 0
@@ -32,6 +31,7 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
         super.onCreate(savedInstanceState)
         val contentParent = window!!.decorView.findViewById<ViewGroup>(Window.ID_ANDROID_CONTENT)
         val contentView = onCreateView(contentParent, savedInstanceState)
+        viewHolder.attach(contentView)
         onViewCreated(contentView, savedInstanceState)
         setContentView(contentView)
         onViewAttached(contentView, savedInstanceState)
@@ -72,6 +72,7 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
                 }
             }
         }
+        viewHolder.bindClickListener(this)
     }
 
     @CallSuper
@@ -197,6 +198,23 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     fun cancelableOnTouchOutside(cancelable: Boolean): AnyDialog {
         setCanceledOnTouchOutside(cancelable)
         return this
+    }
+
+    fun click(vararg ids: Int, listener: AnyDialog.(view: View) -> Unit): AnyDialog {
+        viewHolder.addClickListener(ids, listener)
+        return this
+    }
+
+    fun clickDismiss(vararg ids: Int, listener: (AnyDialog.(view: View) -> Unit)? = null): AnyDialog {
+        viewHolder.addClickListener(ids) {
+            dismiss()
+            listener?.invoke(this, it)
+        }
+        return this
+    }
+
+    fun <V : View> find(@IdRes id: Int): V? {
+        return viewHolder.find(id)
     }
 
     enum class Style(
