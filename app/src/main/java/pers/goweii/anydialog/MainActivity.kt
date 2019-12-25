@@ -13,6 +13,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         btn_def.setOnClickListener {
             AnyDialog(this).apply {
+                style(AnyDialog.Style.BOTTOM)
                 contentView(R.layout.dialog_def)
                 clickDismiss(R.id.tv_close) {
                     Toast.makeText(this@MainActivity, "点击了关闭", Toast.LENGTH_SHORT).show()

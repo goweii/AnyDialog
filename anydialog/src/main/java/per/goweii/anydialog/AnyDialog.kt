@@ -6,13 +6,14 @@ import android.graphics.Color
 import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
-import androidx.annotation.*
 import android.view.*
 import android.widget.FrameLayout
+import androidx.annotation.*
 
 open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
-
     private val viewHolder = ViewHolder()
+
+    private var dataBind: (AnyDialog.() -> Unit)? = null
 
     @LayoutRes
     private var layoutRes: Int = 0
@@ -72,6 +73,7 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
                 }
             }
         }
+        dataBind?.invoke(this)
         viewHolder.bindClickListener(this)
     }
 
@@ -209,6 +211,32 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
         viewHolder.addClickListener(ids) {
             dismiss()
             listener?.invoke(this, it)
+        }
+        return this
+    }
+
+    fun bindData(dataBind: AnyDialog.() -> Unit): AnyDialog {
+        this.dataBind = dataBind
+        return this
+    }
+
+    fun onShow(listener: AnyDialog.() -> Unit): AnyDialog {
+        setOnShowListener {
+            listener.invoke(this)
+        }
+        return this
+    }
+
+    fun onDismiss(listener: AnyDialog.() -> Unit): AnyDialog {
+        setOnDismissListener {
+            listener.invoke(this)
+        }
+        return this
+    }
+
+    fun onKey(listener: AnyDialog.(code: Int, event: KeyEvent) -> Boolean): AnyDialog {
+        setOnKeyListener { _, code, event ->
+            listener.invoke(this, code, event)
         }
         return this
     }

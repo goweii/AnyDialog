@@ -16,6 +16,14 @@ internal class ViewHolder {
         this.contentView = contentView
     }
 
+    internal fun <V : View> find(@IdRes id: Int): V? {
+        return viewCache[id]?.let {
+            it as V
+        } ?: contentView?.findViewById<V>(id)?.also {
+            viewCache.put(id, it)
+        }
+    }
+
     internal fun addClickListener(ids: IntArray, listener: AnyDialog.(view: View) -> Unit) {
         clickListeners[ids] = listener
     }
@@ -27,22 +35,6 @@ internal class ViewHolder {
                     map.value.invoke(anyDialog, it)
                 }
             }
-        }
-    }
-
-    inline fun bindClickListener(ids: IntArray, crossinline listener: (view: View) -> Unit) {
-        ids.forEach { id ->
-            find<View>(id)?.setOnClickListener {
-                listener.invoke(it)
-            }
-        }
-    }
-
-    internal fun <V : View> find(@IdRes id: Int): V? {
-        return viewCache[id]?.let {
-            it as V
-        } ?: contentView?.findViewById<V>(id)?.also {
-            viewCache.put(id, it)
         }
     }
 
