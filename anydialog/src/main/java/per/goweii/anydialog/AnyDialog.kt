@@ -30,16 +30,14 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     private var horizontalMargin: Float? = null
     private var verticalMargin: Float? = null
 
-    private lateinit var content: View
-
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val contentParent = checkNotNull(window).decorView.findViewById<ViewGroup>(Window.ID_ANDROID_CONTENT)
-        content = onCreateView(contentParent, savedInstanceState)
-        onViewCreated(content, savedInstanceState)
-        setContentView(content)
-        onViewAttached(content, savedInstanceState)
+        val contentParent = window!!.decorView.findViewById<ViewGroup>(Window.ID_ANDROID_CONTENT)
+        val contentView = onCreateView(contentParent, savedInstanceState)
+        onViewCreated(contentView, savedInstanceState)
+        setContentView(contentView)
+        onViewAttached(contentView, savedInstanceState)
     }
 
     protected open fun onCreateView(parent: ViewGroup, savedInstanceState: Bundle?): View {
@@ -48,15 +46,12 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     @CallSuper
     protected open fun onViewCreated(contentView: View, savedInstanceState: Bundle?) {
-        val params = contentView.layoutParams
-        if (params is FrameLayout.LayoutParams) {
-            if (gravity == null) {
-                if (params.gravity != Gravity.NO_GRAVITY) {
-                    gravity = params.gravity
-                }
-            }
+        val params = contentView.layoutParams as FrameLayout.LayoutParams
+        if (gravity == null && params.gravity != FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY)
+            gravity = params.gravity
+        if (width == null || height == null) {
             val size = Point()
-            checkNotNull(window).windowManager.defaultDisplay.getSize(size)
+            window!!.windowManager.defaultDisplay.getSize(size)
             if (width == null) {
                 width = if (params.width == ViewGroup.LayoutParams.MATCH_PARENT) {
                     if (params.leftMargin == 0 && params.rightMargin == 0) {
@@ -84,13 +79,21 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     @CallSuper
     protected open fun onViewAttached(contentView: View, savedInstanceState: Bundle?) {
-        val w = checkNotNull(window)
+        val w = window!!
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             w.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
             w.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             w.statusBarColor = Color.TRANSPARENT
         }
+        w.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
+        if (dimBehind()) w.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        else w.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        dimAmount()?.let { w.setDimAmount(it) }
+        w.setWindowAnimations(animation())
+        val decorView: View = w.decorView
+        decorView.setPadding(0, 0, 0, 0)
+        decorView.setBackgroundColor(Color.TRANSPARENT)
         val attr = w.attributes
         gravity()?.let { attr.gravity = it }
         width()?.let { attr.width = it }
@@ -102,16 +105,6 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
             }
         }
         w.attributes = attr
-        if (dimBehind()) {
-            w.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        } else {
-            w.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        }
-        dimAmount()?.let { w.setDimAmount(it) }
-        w.setWindowAnimations(animation())
-        val decorView: View = w.decorView
-        decorView.setPadding(0, 0, 0, 0)
-        decorView.setBackgroundColor(Color.TRANSPARENT)
     }
 
     protected open fun getLayoutRes() = layoutRes
