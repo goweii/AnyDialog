@@ -22,13 +22,10 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     private var dimBehind: Boolean = true
     @FloatRange(from = 0.0, to = 1.0)
     private var dimAmount: Float? = null
-
     private var gravity: Int? = null
-    private var fullscreen: Boolean? = null
     private var width: Int? = null
     private var height: Int? = null
-    private var horizontalMargin: Float? = null
-    private var verticalMargin: Float? = null
+    private var fullscreen: Boolean? = null
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,10 +121,6 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     protected open fun height(): Int? = height
 
-    protected open fun horizontalMargin(): Float? = horizontalMargin
-
-    protected open fun verticalMargin(): Float? = verticalMargin
-
     fun contentView(layoutRes: Int): AnyDialog {
         this.layoutRes = layoutRes
         return this
@@ -192,6 +185,12 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     fun cancelable(cancelable: Boolean): AnyDialog {
         setCancelable(cancelable)
+        setCanceledOnTouchOutside(cancelable)
+        return this
+    }
+
+    fun cancelableOnClickKeyBack(cancelable: Boolean): AnyDialog {
+        setCancelable(cancelable)
         return this
     }
 
@@ -206,7 +205,7 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
             val width: Int,
             val height: Int
     ) {
-        DEFAULT(R.style.DialogAnimDef, Gravity.CENTER,
+        CENTER(R.style.DialogAnimDef, Gravity.CENTER,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT),
         BOTTOM(R.style.DialogAnimBottom, Gravity.BOTTOM,
