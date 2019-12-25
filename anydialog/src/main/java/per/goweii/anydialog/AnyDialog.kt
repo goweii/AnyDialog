@@ -15,6 +15,7 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     private var dataBind: (AnyDialog.() -> Unit)? = null
 
+    private var content: View? = null
     @LayoutRes
     private var layoutRes: Int = 0
     @StyleRes
@@ -39,7 +40,7 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     }
 
     protected open fun onCreateView(parent: ViewGroup, savedInstanceState: Bundle?): View {
-        return layoutInflater.inflate(getLayoutRes(), parent, false)
+        return content ?: layoutInflater.inflate(getLayoutRes(), parent, false)
     }
 
     @CallSuper
@@ -126,6 +127,11 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     fun contentView(layoutRes: Int): AnyDialog {
         this.layoutRes = layoutRes
+        return this
+    }
+
+    fun contentView(content: View): AnyDialog {
+        this.content = content
         return this
     }
 
