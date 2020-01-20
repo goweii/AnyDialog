@@ -27,6 +27,9 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     private var width: Int? = null
     private var height: Int? = null
     private var fullscreen: Boolean? = null
+    private var fitSystemWindow: Boolean? = null
+
+    private var dragDirection: DragDirection? = null
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,12 +42,36 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
         onViewAttached(contentView, savedInstanceState)
     }
 
+    @CallSuper
     protected open fun onCreateView(parent: ViewGroup, savedInstanceState: Bundle?): View {
-        return content ?: layoutInflater.inflate(getLayoutRes(), parent, false)
+        val container: ViewGroup = dragDirection?.let {
+            DragLayout3(parent.context).apply {
+                dragStyle(when (it) {
+                    DragDirection.LEFT -> DragLayout3.DragStyle.Left
+                    DragDirection.TOP -> DragLayout3.DragStyle.Top
+                    DragDirection.RIGHT -> DragLayout3.DragStyle.Right
+                    DragDirection.BOTTOM -> DragLayout3.DragStyle.Bottom
+                })
+                onDragging { f ->
+                    dimAmount()?.let { d ->
+                        window?.setDimAmount(d * (1F - f))
+                    }
+                }
+                onDragEnd { dismiss() }
+            }
+        } ?: run {
+            FrameLayout(parent.context)
+        }
+        val content = content ?: layoutInflater.inflate(getLayoutRes(), container, false)
+        container.layoutParams = content.layoutParams
+        content.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        container.addView(content)
+        return container
     }
 
     @CallSuper
     protected open fun onViewCreated(contentView: View, savedInstanceState: Bundle?) {
+        fitSystemWindow()?.let { contentView.fitsSystemWindows = it }
         val params = contentView.layoutParams as FrameLayout.LayoutParams
         if (gravity == null && params.gravity != FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY)
             gravity = params.gravity
@@ -88,9 +115,6 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
             w.statusBarColor = Color.TRANSPARENT
         }
         w.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
-        if (dimBehind()) w.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        else w.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        dimAmount()?.let { w.setDimAmount(it) }
         w.setWindowAnimations(animation())
         val decorView: View = w.decorView
         decorView.setPadding(0, 0, 0, 0)
@@ -106,6 +130,25 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
             }
         }
         w.attributes = attr
+    }
+
+    override fun onStart() {
+        resetDim()
+        super.onStart()
+    }
+
+    private fun resetDim() {
+        val w = window!!
+        if (dimBehind()) {
+            w.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        } else {
+            w.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        }
+        dimAmount()?.let {
+            w.setDimAmount(it)
+        } ?: run {
+            dimAmount = w.attributes.dimAmount
+        }
     }
 
     protected open fun getLayoutRes() = layoutRes
@@ -125,6 +168,8 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     protected open fun height(): Int? = height
 
+    protected open fun fitSystemWindow(): Boolean? = fitSystemWindow
+
     fun contentView(layoutRes: Int): AnyDialog {
         this.layoutRes = layoutRes
         return this
@@ -135,11 +180,17 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
         return this
     }
 
+    fun dragDirection(dragDirection: DragDirection?): AnyDialog {
+        this.dragDirection = dragDirection
+        return this
+    }
+
     fun style(style: Style): AnyDialog {
         this.animRes = style.animRes
         this.gravity = style.gravity
         this.width = style.width
         this.height = style.height
+        this.dragDirection = style.dragDirection
         return this
     }
 
@@ -156,6 +207,11 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     fun fullscreen(fullscreen: Boolean): AnyDialog {
         this.fullscreen = fullscreen
+        return this
+    }
+
+    fun fitSystemWindow(fitSystemWindow: Boolean): AnyDialog {
+        this.fitSystemWindow = fitSystemWindow
         return this
     }
 
@@ -254,23 +310,28 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     enum class Style(
             val animRes: Int,
             val gravity: Int,
-            val width: Int,
-            val height: Int
+            val width: Int?,
+            val height: Int?,
+            val dragDirection: DragDirection?
     ) {
         CENTER(R.style.DialogAnimDef, Gravity.CENTER,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT),
-        BOTTOM(R.style.DialogAnimBottom, Gravity.BOTTOM,
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.WRAP_CONTENT),
-        TOP(R.style.DialogAnimTop, Gravity.TOP,
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.WRAP_CONTENT),
-        LEFT(R.style.DialogAnimLeft, Gravity.LEFT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.MATCH_PARENT),
-        RIGHT(R.style.DialogAnimRight, Gravity.RIGHT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.MATCH_PARENT)
+                null, null,
+                null),
+        BOTTOM(R.style.DialogAnimBottom, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL,
+                WindowManager.LayoutParams.MATCH_PARENT, null,
+                DragDirection.BOTTOM),
+        TOP(R.style.DialogAnimTop, Gravity.TOP or Gravity.CENTER_HORIZONTAL,
+                WindowManager.LayoutParams.MATCH_PARENT, null,
+                DragDirection.TOP),
+        LEFT(R.style.DialogAnimLeft, Gravity.LEFT or Gravity.CENTER_VERTICAL,
+                null, WindowManager.LayoutParams.MATCH_PARENT,
+                DragDirection.LEFT),
+        RIGHT(R.style.DialogAnimRight, Gravity.RIGHT or Gravity.CENTER_VERTICAL,
+                null, WindowManager.LayoutParams.MATCH_PARENT,
+                DragDirection.RIGHT)
+    }
+
+    enum class DragDirection {
+        LEFT, TOP, RIGHT, BOTTOM
     }
 }

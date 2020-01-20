@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">AnyDialog</string>
 
-    <string name="dialog_msg">Android高定制性，高易用性Dialog。\n- 链式调用；\n- 可自定义进出场动画；\n- 可自由控制显示大小和位置</string>
+    <string name="dialog_msg">简化dialog创建，内置5个默认样式，力求还原Android系统动画效果</string>
 </resources>
