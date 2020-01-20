@@ -28,6 +28,10 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     private var height: Int? = null
     private var fullscreen: Boolean? = null
     private var fitSystemWindow: Boolean? = null
+    private var fillSystemLeft: Boolean = false
+    private var fillSystemRight: Boolean = false
+    private var fillSystemTop: Boolean = false
+    private var fillSystemBottom: Boolean = false
 
     private var dragDirection: DragDirection? = null
 
@@ -71,7 +75,27 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     @CallSuper
     protected open fun onViewCreated(contentView: View, savedInstanceState: Bundle?) {
-        fitSystemWindow()?.let { contentView.fitsSystemWindows = it }
+        fitSystemWindow()?.let {
+            contentView.fitsSystemWindows = it
+            if (it && contentView is ViewGroup) {
+                contentView.clipToPadding = false
+                if (fillSystemLeft() || fillSystemRight() || fillSystemTop() || fillSystemBottom()) {
+                    contentView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+                        override fun onPreDraw(): Boolean {
+                            if (contentView.viewTreeObserver.isAlive) {
+                                contentView.viewTreeObserver.removeOnPreDrawListener(this)
+                            }
+                            val l = if (fillSystemLeft()) 0 else contentView.paddingLeft
+                            val t = if (fillSystemTop()) 0 else contentView.paddingTop
+                            val r = if (fillSystemRight()) 0 else contentView.paddingRight
+                            val b = if (fillSystemBottom()) 0 else contentView.paddingBottom
+                            contentView.setPadding(l, t, r, b)
+                            return true
+                        }
+                    })
+                }
+            }
+        }
         val params = contentView.layoutParams as FrameLayout.LayoutParams
         if (gravity == null && params.gravity != FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY)
             gravity = params.gravity
@@ -157,18 +181,19 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     protected open fun animation(): Int = animRes
 
     protected open fun dimBehind(): Boolean = dimBehind
-
     protected open fun dimAmount(): Float? = dimAmount
 
     protected open fun gravity(): Int? = gravity
 
     protected open fun fullscreen(): Boolean? = fullscreen
-
     protected open fun width(): Int? = width
-
     protected open fun height(): Int? = height
 
     protected open fun fitSystemWindow(): Boolean? = fitSystemWindow
+    protected open fun fillSystemTop(): Boolean = fillSystemTop
+    protected open fun fillSystemBottom(): Boolean = fillSystemBottom
+    protected open fun fillSystemLeft(): Boolean = fillSystemLeft
+    protected open fun fillSystemRight(): Boolean = fillSystemRight
 
     fun contentView(layoutRes: Int): AnyDialog {
         this.layoutRes = layoutRes
@@ -199,7 +224,6 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
         return this
     }
 
-
     fun animation(@StyleRes animRes: Int): AnyDialog {
         this.animRes = animRes
         return this
@@ -212,6 +236,26 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     fun fitSystemWindow(fitSystemWindow: Boolean): AnyDialog {
         this.fitSystemWindow = fitSystemWindow
+        return this
+    }
+
+    fun fillSystemTop(fillSystemTop: Boolean): AnyDialog {
+        this.fillSystemTop = fillSystemTop
+        return this
+    }
+
+    fun fillSystemBottom(fillSystemBottom: Boolean): AnyDialog {
+        this.fillSystemBottom = fillSystemBottom
+        return this
+    }
+
+    fun fillSystemLeft(fillSystemLeft: Boolean): AnyDialog {
+        this.fillSystemLeft = fillSystemLeft
+        return this
+    }
+
+    fun fillSystemRight(fillSystemRight: Boolean): AnyDialog {
+        this.fillSystemRight = fillSystemRight
         return this
     }
 

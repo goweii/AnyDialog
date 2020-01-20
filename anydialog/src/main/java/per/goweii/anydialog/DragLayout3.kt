@@ -69,11 +69,14 @@ internal class DragLayout3 : FrameLayout, NestedScrollingParent3 {
         }
         when (ev.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN -> {
+                mDragHelper.abort()
+                mScroller.abortAnimation()
                 usingNested = false
                 mDownX = ev.rawX
                 mDownY = ev.rawY
             }
         }
+        Log.d("DragLayout", "onInterceptTouchEvent->mDownY=$mDownY，mDownY=$mDownY")
         if (usingNested) {
             mHandleTouchEvent = false
             return super.onInterceptTouchEvent(ev)
@@ -86,30 +89,23 @@ internal class DragLayout3 : FrameLayout, NestedScrollingParent3 {
                     when (mDragStyle) {
                         DragStyle.None -> {
                         }
-                        DragStyle.Left -> {
-                            if (!DragCompat.canViewScrollRight(mInnerScrollViews, mDownX, mDownY, false)) {
-                                mHandleTouchEvent = true
-                            }
+                        DragStyle.Left -> if (!DragCompat.canViewScrollRight(mInnerScrollViews, mDownX, mDownY, false)) {
+                            mHandleTouchEvent = true
                         }
-                        DragStyle.Right -> {
-                            if (!DragCompat.canViewScrollLeft(mInnerScrollViews, mDownX, mDownY, false)) {
-                                mHandleTouchEvent = true
-                            }
+                        DragStyle.Right -> if (!DragCompat.canViewScrollLeft(mInnerScrollViews, mDownX, mDownY, false)) {
+                            mHandleTouchEvent = true
                         }
-                        DragStyle.Top -> {
-                            if (!DragCompat.canViewScrollDown(mInnerScrollViews, mDownX, mDownY, false)) {
-                                mHandleTouchEvent = true
-                            }
+                        DragStyle.Top -> if (!DragCompat.canViewScrollDown(mInnerScrollViews, mDownX, mDownY, false)) {
+                            mHandleTouchEvent = true
                         }
-                        DragStyle.Bottom -> {
-                            if (!DragCompat.canViewScrollUp(mInnerScrollViews, mDownX, mDownY, false)) {
-                                mHandleTouchEvent = true
-                            }
+                        DragStyle.Bottom -> if (!DragCompat.canViewScrollUp(mInnerScrollViews, mDownX, mDownY, false)) {
+                            mHandleTouchEvent = true
                         }
                     }
                 }
             }
         }
+        Log.d("DragLayout", "onInterceptTouchEvent->type=$shouldIntercept")
         return shouldIntercept
     }
 
@@ -189,9 +185,7 @@ internal class DragLayout3 : FrameLayout, NestedScrollingParent3 {
             mDragFraction = 1f
         }
         onDragging()
-        if (mDragFraction == 1F) {
-            onDragEnd()
-        }
+        if (mDragFraction == 1F) onDragEnd()
     }
 
     private fun onDragStart() {
@@ -462,14 +456,13 @@ internal class DragLayout3 : FrameLayout, NestedScrollingParent3 {
         Log.d("DragLayout", "onStopNestedScroll->type=$type")
         if (type == ViewCompat.TYPE_TOUCH) {
             Log.d("DragLayout", "onStopNestedScroll->velocity=$velocity")
-            val dismissByVelocity = when (mDragStyle) {
+            val dismiss = when (mDragStyle) {
                 DragStyle.None -> false
                 DragStyle.Left -> scrollX > 0 && velocity > _dismissVelocity
                 DragStyle.Right -> scrollX < 0 && -velocity > _dismissVelocity
                 DragStyle.Top -> scrollY > 0 && velocity > _dismissVelocity
                 DragStyle.Bottom -> scrollY < 0 && -velocity > _dismissVelocity
-            }
-            val dismiss = dismissByVelocity || mDragFraction >= _dismissFraction
+            } || mDragFraction >= _dismissFraction
             Log.d("DragLayout", "onStopNestedScroll->dismiss=$dismiss")
             if (dismiss) {
                 when (mDragStyle) {
@@ -585,7 +578,7 @@ internal class DragLayout3 : FrameLayout, NestedScrollingParent3 {
 
         override fun onViewPositionChanged(changedView: View, left: Int, top: Int, dx: Int, dy: Int) {
             super.onViewPositionChanged(changedView, left, top, dx, dy)
-            Log.d("DragLayout", "onViewPositionChanged")
+            Log.d("DragLayout", "onViewPositionChanged->dx=$dx,dy=$dy")
             when (mDragStyle) {
                 DragStyle.Left, DragStyle.Right -> {
                     val xoff = abs(left - mLeft).toFloat()
@@ -612,10 +605,16 @@ internal class DragLayout3 : FrameLayout, NestedScrollingParent3 {
         override fun onViewReleased(releasedChild: View, xvel: Float, yvel: Float) {
             super.onViewReleased(releasedChild, xvel, yvel)
             Log.d("DragLayout", "onViewReleased")
-            val isDismiss = judgeDismissBySpeed(xvel, yvel) || mDragFraction >= _dismissFraction
+            val dismiss = when (mDragStyle) {
+                DragStyle.Left -> xvel < -_dismissVelocity
+                DragStyle.Right -> xvel > _dismissVelocity
+                DragStyle.Top -> yvel < -_dismissVelocity
+                DragStyle.Bottom -> yvel > _dismissVelocity
+                DragStyle.None -> false
+            } || mDragFraction >= _dismissFraction
             var l = mLeft
             var t = mTop
-            if (isDismiss) {
+            if (dismiss) {
                 when (mDragStyle) {
                     DragStyle.Left -> l = -(mLeft + releasedChild.width)
                     DragStyle.Right -> l = width
@@ -627,18 +626,6 @@ internal class DragLayout3 : FrameLayout, NestedScrollingParent3 {
             }
             mDragHelper.settleCapturedViewAt(l, t)
             invalidate()
-        }
-
-        private fun judgeDismissBySpeed(xvel: Float, yvel: Float): Boolean {
-            when (mDragStyle) {
-                DragStyle.Left -> return xvel < -_dismissVelocity
-                DragStyle.Right -> return xvel > _dismissVelocity
-                DragStyle.Top -> return yvel < -_dismissVelocity
-                DragStyle.Bottom -> return yvel > _dismissVelocity
-                DragStyle.None -> {
-                }
-            }
-            return false
         }
     }
 

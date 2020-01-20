@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
         }
         btn_top.setOnClickListener {
             AnyDialog(this).apply {
+                fitSystemWindow(true)
                 style(AnyDialog.Style.TOP)
                 contentView(R.layout.dialog_top)
                 clickDismiss(R.id.tv_close)

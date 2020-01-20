@@ -16,6 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="44dp"
             android:layout_marginLeft="16dp"
+            android:textStyle="bold"
             android:gravity="center_vertical"
             android:text="@string/app_name"
             android:textColor="#232323"
