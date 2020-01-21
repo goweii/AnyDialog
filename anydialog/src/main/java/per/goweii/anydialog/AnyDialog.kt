@@ -10,45 +10,72 @@ import android.view.*
 import android.widget.FrameLayout
 import androidx.annotation.*
 
-open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
+open class AnyDialog(
+        context: Context,
+        private val initializer: (AnyDialog.() -> Unit)? = null
+) : Dialog(context, R.style.Dialog) {
+
     private val viewHolder = ViewHolder()
 
-    private var dataBind: (AnyDialog.() -> Unit)? = null
+    lateinit var container: ViewGroup
 
-    private var content: View? = null
     @LayoutRes
-    private var layoutRes: Int = 0
-    @StyleRes
-    private var animRes: Int = R.style.DialogAnimDef
-    private var dimBehind: Boolean = true
-    @FloatRange(from = 0.0, to = 1.0)
-    private var dimAmount: Float? = null
-    private var gravity: Int? = null
-    private var width: Int? = null
-    private var height: Int? = null
-    private var fullscreen: Boolean? = null
-    private var fitSystemWindow: Boolean? = null
-    private var fillSystemLeft: Boolean = false
-    private var fillSystemRight: Boolean = false
-    private var fillSystemTop: Boolean = false
-    private var fillSystemBottom: Boolean = false
+    open var contentRes: Int = 0
+    open lateinit var content: View
 
-    private var dragDirection: DragDirection? = null
+    @StyleRes
+    open var animation: Int = R.style.DialogAnimDef
+
+    open var dimBehind: Boolean = true
+    @FloatRange(from = 0.0, to = 1.0)
+    open var dimAmount: Float? = null
+
+    open var gravity: Int? = null
+
+    open var width: Int? = null
+    open var height: Int? = null
+    open var fullscreen: Boolean = false
+
+    open var fitSystemWindow: Boolean = false
+    open var fitSystemLeft: Boolean = false
+    open var fitSystemTop: Boolean = false
+    open var fitSystemRight: Boolean = false
+    open var fitSystemBottom: Boolean = false
+
+    open var style: Style? = null
+        set(value) {
+            field = value?.also {
+                animation = it.animRes
+                gravity = it.gravity
+                width = it.width
+                height = it.height
+                dragDirection = it.dragDirection
+            }
+        }
+
+    open var dragDirection: DragDirection? = null
+
+    var dataBind: (AnyDialog.() -> Unit)? = null
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
+        initializer?.invoke(this)
         super.onCreate(savedInstanceState)
-        val contentParent = window!!.decorView.findViewById<ViewGroup>(Window.ID_ANDROID_CONTENT)
-        val contentView = onCreateView(contentParent, savedInstanceState)
-        viewHolder.attach(contentView)
-        onViewCreated(contentView, savedInstanceState)
-        setContentView(contentView)
-        onViewAttached(contentView, savedInstanceState)
+        container = onCreateContainer()
+        content = onCreateView(container, savedInstanceState)
+        container.layoutParams = content.layoutParams
+        content.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        container.addView(content)
+        viewHolder.attach(container)
+        onViewCreated(container, savedInstanceState)
+        setContentView(container)
+        onViewAttached(container, savedInstanceState)
     }
 
     @CallSuper
-    protected open fun onCreateView(parent: ViewGroup, savedInstanceState: Bundle?): View {
-        val container: ViewGroup = dragDirection?.let {
+    protected open fun onCreateContainer(): ViewGroup {
+        val parent = window!!.decorView.findViewById<ViewGroup>(Window.ID_ANDROID_CONTENT)
+        return dragDirection?.let {
             DragLayout3(parent.context).apply {
                 dragStyle(when (it) {
                     DragDirection.LEFT -> DragLayout3.DragStyle.Left
@@ -57,8 +84,8 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
                     DragDirection.BOTTOM -> DragLayout3.DragStyle.Bottom
                 })
                 onDragging { f ->
-                    dimAmount()?.let { d ->
-                        window?.setDimAmount(d * (1F - f))
+                    dimAmount?.let {
+                        window?.setDimAmount(it * (1F - f))
                     }
                 }
                 onDragEnd { dismiss() }
@@ -66,62 +93,69 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
         } ?: run {
             FrameLayout(parent.context)
         }
-        val content = content ?: layoutInflater.inflate(getLayoutRes(), container, false)
-        container.layoutParams = content.layoutParams
-        content.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        container.addView(content)
-        return container
     }
 
     @CallSuper
-    protected open fun onViewCreated(contentView: View, savedInstanceState: Bundle?) {
-        fitSystemWindow()?.let {
-            contentView.fitsSystemWindows = it
-            if (it && contentView is ViewGroup) {
-                contentView.clipToPadding = false
-                if (fillSystemLeft() || fillSystemRight() || fillSystemTop() || fillSystemBottom()) {
-                    contentView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+    protected open fun onCreateView(container: ViewGroup, savedInstanceState: Bundle?): View {
+        return if (this::content.isInitialized) {
+            this.content
+        } else {
+            layoutInflater.inflate(contentRes, container, false)
+        }
+    }
+
+    @CallSuper
+    protected open fun onViewCreated(content: View, savedInstanceState: Bundle?) {
+        if (fitSystemWindow || fitSystemLeft || fitSystemTop || fitSystemRight || fitSystemBottom) {
+            content.fitsSystemWindows = true
+            if (content is ViewGroup) {
+                content.clipToPadding = false
+                if (!fitSystemWindow && (!fitSystemLeft || !fitSystemTop || !fitSystemRight || !fitSystemBottom)) {
+                    content.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
                         override fun onPreDraw(): Boolean {
-                            if (contentView.viewTreeObserver.isAlive) {
-                                contentView.viewTreeObserver.removeOnPreDrawListener(this)
+                            if (content.viewTreeObserver.isAlive) {
+                                content.viewTreeObserver.removeOnPreDrawListener(this)
                             }
-                            val l = if (fillSystemLeft()) 0 else contentView.paddingLeft
-                            val t = if (fillSystemTop()) 0 else contentView.paddingTop
-                            val r = if (fillSystemRight()) 0 else contentView.paddingRight
-                            val b = if (fillSystemBottom()) 0 else contentView.paddingBottom
-                            contentView.setPadding(l, t, r, b)
+                            val l = if (fitSystemLeft) content.paddingLeft else 0
+                            val t = if (fitSystemTop) content.paddingTop else 0
+                            val r = if (fitSystemRight) content.paddingRight else 0
+                            val b = if (fitSystemBottom) content.paddingBottom else 0
+                            content.setPadding(l, t, r, b)
                             return true
                         }
                     })
                 }
             }
         }
-        val params = contentView.layoutParams as FrameLayout.LayoutParams
-        if (gravity == null && params.gravity != FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY)
+        val params = content.layoutParams as FrameLayout.LayoutParams
+        if (gravity == null && params.gravity != FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY) {
             gravity = params.gravity
+        }
         if (width == null || height == null) {
-            val size = Point()
-            window!!.windowManager.defaultDisplay.getSize(size)
-            if (width == null) {
-                width = if (params.width == ViewGroup.LayoutParams.MATCH_PARENT) {
-                    if (params.leftMargin == 0 && params.rightMargin == 0) {
+            Point().apply {
+                window!!.windowManager.defaultDisplay.getSize(this)
+            }.also { size ->
+                if (width == null) {
+                    width = if (params.width == ViewGroup.LayoutParams.MATCH_PARENT) {
+                        if (params.leftMargin == 0 && params.rightMargin == 0) {
+                            params.width
+                        } else {
+                            size.x - params.leftMargin - params.rightMargin
+                        }
+                    } else {
                         params.width
-                    } else {
-                        size.x - params.leftMargin - params.rightMargin
                     }
-                } else {
-                    params.width
                 }
-            }
-            if (height == null) {
-                height = if (params.height == ViewGroup.LayoutParams.MATCH_PARENT) {
-                    if (params.topMargin == 0 && params.bottomMargin == 0) {
-                        params.height
+                if (height == null) {
+                    height = if (params.height == ViewGroup.LayoutParams.MATCH_PARENT) {
+                        if (params.topMargin == 0 && params.bottomMargin == 0) {
+                            params.height
+                        } else {
+                            size.y - params.topMargin - params.bottomMargin
+                        }
                     } else {
-                        size.y - params.topMargin - params.bottomMargin
+                        params.height
                     }
-                } else {
-                    params.height
                 }
             }
         }
@@ -130,7 +164,7 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
     }
 
     @CallSuper
-    protected open fun onViewAttached(contentView: View, savedInstanceState: Bundle?) {
+    protected open fun onViewAttached(content: View, savedInstanceState: Bundle?) {
         val w = window!!
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             w.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
@@ -139,21 +173,17 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
             w.statusBarColor = Color.TRANSPARENT
         }
         w.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
-        w.setWindowAnimations(animation())
-        val decorView: View = w.decorView
-        decorView.setPadding(0, 0, 0, 0)
-        decorView.setBackgroundColor(Color.TRANSPARENT)
-        val attr = w.attributes
-        gravity()?.let { attr.gravity = it }
-        width()?.let { attr.width = it }
-        height()?.let { attr.height = it }
-        fullscreen()?.let {
-            if (it) {
-                attr.width = WindowManager.LayoutParams.MATCH_PARENT
-                attr.height = WindowManager.LayoutParams.MATCH_PARENT
-            }
+        val decor: View = w.decorView
+        decor.setPadding(0, 0, 0, 0)
+        decor.setBackgroundColor(Color.TRANSPARENT)
+        w.setWindowAnimations(animation)
+        gravity?.let { w.attributes.gravity = it }
+        width?.let { w.attributes.width = it }
+        height?.let { w.attributes.height = it }
+        if (fullscreen) {
+            w.attributes.width = WindowManager.LayoutParams.MATCH_PARENT
+            w.attributes.height = WindowManager.LayoutParams.MATCH_PARENT
         }
-        w.attributes = attr
     }
 
     override fun onStart() {
@@ -163,110 +193,16 @@ open class AnyDialog(context: Context) : Dialog(context, R.style.Dialog) {
 
     private fun resetDim() {
         val w = window!!
-        if (dimBehind()) {
+        if (dimBehind) {
             w.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         } else {
             w.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         }
-        dimAmount()?.let {
+        dimAmount?.let {
             w.setDimAmount(it)
         } ?: run {
             dimAmount = w.attributes.dimAmount
         }
-    }
-
-    protected open fun getLayoutRes() = layoutRes
-
-    @StyleRes
-    protected open fun animation(): Int = animRes
-
-    protected open fun dimBehind(): Boolean = dimBehind
-    protected open fun dimAmount(): Float? = dimAmount
-
-    protected open fun gravity(): Int? = gravity
-
-    protected open fun fullscreen(): Boolean? = fullscreen
-    protected open fun width(): Int? = width
-    protected open fun height(): Int? = height
-
-    protected open fun fitSystemWindow(): Boolean? = fitSystemWindow
-    protected open fun fillSystemTop(): Boolean = fillSystemTop
-    protected open fun fillSystemBottom(): Boolean = fillSystemBottom
-    protected open fun fillSystemLeft(): Boolean = fillSystemLeft
-    protected open fun fillSystemRight(): Boolean = fillSystemRight
-
-    fun contentView(layoutRes: Int): AnyDialog {
-        this.layoutRes = layoutRes
-        return this
-    }
-
-    fun contentView(content: View): AnyDialog {
-        this.content = content
-        return this
-    }
-
-    fun dragDirection(dragDirection: DragDirection?): AnyDialog {
-        this.dragDirection = dragDirection
-        return this
-    }
-
-    fun style(style: Style): AnyDialog {
-        this.animRes = style.animRes
-        this.gravity = style.gravity
-        this.width = style.width
-        this.height = style.height
-        this.dragDirection = style.dragDirection
-        return this
-    }
-
-    fun gravity(gravity: Int): AnyDialog {
-        this.gravity = gravity
-        return this
-    }
-
-    fun animation(@StyleRes animRes: Int): AnyDialog {
-        this.animRes = animRes
-        return this
-    }
-
-    fun fullscreen(fullscreen: Boolean): AnyDialog {
-        this.fullscreen = fullscreen
-        return this
-    }
-
-    fun fitSystemWindow(fitSystemWindow: Boolean): AnyDialog {
-        this.fitSystemWindow = fitSystemWindow
-        return this
-    }
-
-    fun fillSystemTop(fillSystemTop: Boolean): AnyDialog {
-        this.fillSystemTop = fillSystemTop
-        return this
-    }
-
-    fun fillSystemBottom(fillSystemBottom: Boolean): AnyDialog {
-        this.fillSystemBottom = fillSystemBottom
-        return this
-    }
-
-    fun fillSystemLeft(fillSystemLeft: Boolean): AnyDialog {
-        this.fillSystemLeft = fillSystemLeft
-        return this
-    }
-
-    fun fillSystemRight(fillSystemRight: Boolean): AnyDialog {
-        this.fillSystemRight = fillSystemRight
-        return this
-    }
-
-    fun width(width: Int): AnyDialog {
-        this.width = width
-        return this
-    }
-
-    fun height(height: Int): AnyDialog {
-        this.height = height
-        return this
     }
 
     /**

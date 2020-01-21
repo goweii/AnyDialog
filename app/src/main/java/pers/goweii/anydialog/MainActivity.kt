@@ -13,17 +13,19 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         btn_def.setOnClickListener {
-            AnyDialog(this).apply {
-                style(AnyDialog.Style.CENTER)
-                contentView(R.layout.dialog_def)
+            AnyDialog(this) {
+                style = AnyDialog.Style.CENTER
+                contentRes = R.layout.dialog_def
                 clickDismiss(R.id.tv_close)
             }.show()
         }
         btn_full.setOnClickListener {
-            AnyDialog(this).apply {
-                style(AnyDialog.Style.CENTER)
-                fullscreen(true)
-                contentView(R.layout.dialog_full)
+            AnyDialog(this) {
+                fitSystemBottom = true
+                fitSystemRight = true
+                style = AnyDialog.Style.CENTER
+                fullscreen = true
+                contentRes = R.layout.dialog_full
                 clickDismiss(R.id.tv_close)
                 bindData {
                     find<RecyclerView>(R.id.rvh)?.init(true)
@@ -32,10 +34,10 @@ class MainActivity : AppCompatActivity() {
             }.show()
         }
         btn_top.setOnClickListener {
-            AnyDialog(this).apply {
-                fitSystemWindow(true)
-                style(AnyDialog.Style.TOP)
-                contentView(R.layout.dialog_top)
+            AnyDialog(this) {
+                fitSystemTop = true
+                style = AnyDialog.Style.TOP
+                contentRes = R.layout.dialog_top
                 clickDismiss(R.id.tv_close)
                 bindData {
                     find<RecyclerView>(R.id.rvh)?.init(true)
@@ -44,10 +46,10 @@ class MainActivity : AppCompatActivity() {
             }.show()
         }
         btn_bottom.setOnClickListener {
-            AnyDialog(this).apply {
-                fitSystemWindow(true)
-                style(AnyDialog.Style.BOTTOM)
-                contentView(R.layout.dialog_bottom)
+            AnyDialog(this) {
+                fitSystemBottom = true
+                style = AnyDialog.Style.BOTTOM
+                contentRes = R.layout.dialog_bottom
                 clickDismiss(R.id.tv_close)
                 bindData {
                     find<RecyclerView>(R.id.rvh)?.init(true)
@@ -56,9 +58,11 @@ class MainActivity : AppCompatActivity() {
             }.show()
         }
         btn_left.setOnClickListener {
-            AnyDialog(this).apply {
-                style(AnyDialog.Style.LEFT)
-                contentView(R.layout.dialog_left)
+            AnyDialog(this) {
+                fitSystemBottom = true
+                fitSystemRight = true
+                style = AnyDialog.Style.LEFT
+                contentRes = R.layout.dialog_left
                 clickDismiss(R.id.tv_close)
                 bindData {
                     find<RecyclerView>(R.id.rvh)?.init(true)
@@ -67,9 +71,11 @@ class MainActivity : AppCompatActivity() {
             }.show()
         }
         btn_right.setOnClickListener {
-            AnyDialog(this).apply {
-                style(AnyDialog.Style.RIGHT)
-                contentView(R.layout.dialog_left)
+            AnyDialog(this) {
+                fitSystemBottom = true
+                fitSystemRight = true
+                style = AnyDialog.Style.RIGHT
+                contentRes = R.layout.dialog_left
                 clickDismiss(R.id.tv_close)
                 bindData {
                     find<RecyclerView>(R.id.rvh)?.init(true)

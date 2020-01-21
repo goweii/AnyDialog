@@ -16,6 +16,7 @@ import kotlin.math.abs
 
 internal class DragLayout3 : FrameLayout, NestedScrollingParent3 {
 
+    private val _dismissDuration = 300
     private val _dismissVelocity = 2000F
     private val _dismissFraction = 0.5F
 
@@ -463,17 +464,23 @@ internal class DragLayout3 : FrameLayout, NestedScrollingParent3 {
                 DragStyle.Top -> scrollY > 0 && velocity > _dismissVelocity
                 DragStyle.Bottom -> scrollY < 0 && -velocity > _dismissVelocity
             } || mDragFraction >= _dismissFraction
+            val f = abs(velocity) / _dismissVelocity
+            val duration: Int = if (f <= 1) {
+                _dismissDuration
+            } else {
+                (_dismissDuration / f).toInt()
+            }
             Log.d("DragLayout", "onStopNestedScroll->dismiss=$dismiss")
             if (dismiss) {
                 when (mDragStyle) {
-                    DragStyle.None -> mScroller.startScroll(scrollX, scrollY, -scrollX, -scrollY)
-                    DragStyle.Left -> mScroller.startScroll(scrollX, scrollY, width - scrollX, -scrollY)
-                    DragStyle.Right -> mScroller.startScroll(scrollX, scrollY, -width - scrollX, -scrollY)
-                    DragStyle.Top -> mScroller.startScroll(scrollX, scrollY, -scrollX, height - scrollY)
-                    DragStyle.Bottom -> mScroller.startScroll(scrollX, scrollY, -scrollX, -height - scrollY)
+                    DragStyle.None -> mScroller.startScroll(scrollX, scrollY, -scrollX, -scrollY, duration)
+                    DragStyle.Left -> mScroller.startScroll(scrollX, scrollY, width - scrollX, -scrollY, duration)
+                    DragStyle.Right -> mScroller.startScroll(scrollX, scrollY, -width - scrollX, -scrollY, duration)
+                    DragStyle.Top -> mScroller.startScroll(scrollX, scrollY, -scrollX, height - scrollY, duration)
+                    DragStyle.Bottom -> mScroller.startScroll(scrollX, scrollY, -scrollX, -height - scrollY, duration)
                 }
             } else {
-                mScroller.startScroll(scrollX, scrollY, -scrollX, -scrollY)
+                mScroller.startScroll(scrollX, scrollY, -scrollX, -scrollY, duration)
             }
             invalidate()
         }
