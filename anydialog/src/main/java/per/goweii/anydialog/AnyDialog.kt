@@ -17,7 +17,7 @@ open class AnyDialog(
 
     private val viewHolder = ViewHolder()
 
-    lateinit var container: ViewGroup
+    protected lateinit var container: ViewGroup
 
     @LayoutRes
     open var contentRes: Int = 0
@@ -26,7 +26,20 @@ open class AnyDialog(
     @StyleRes
     open var animation: Int = R.style.DialogAnimDef
 
+    /**
+     * 是否可背景变暗，所有dialog公用同一个背景遮罩
+     * 为false时dimAmount属性失效
+     * @see dimAmount
+     */
     open var dimBehind: Boolean = true
+    /**
+     * 背景变暗，所有dialog公用同一个背景遮罩
+     * 如果2个dialog的dimAmount不同，则以最后弹出的为准
+     * 即，如果先弹出一个dimAmount=1的弹窗，背景会变为黑色
+     * 再弹出一个dimAmount=0的弹窗，背景会变为透明，可以看到下面的Activity
+     * 这时应该设置这个弹窗的dimBehind=false以达到透明背景效果
+     * @see dimBehind
+     */
     @FloatRange(from = 0.0, to = 1.0)
     open var dimAmount: Float? = null
 
@@ -205,32 +218,9 @@ open class AnyDialog(
         }
     }
 
-    /**
-     * 是否可背景变暗，所有dialog公用同一个背景遮罩
-     * 为false时dimAmount属性失效
-     * @see dimAmount
-     */
-    fun dimBehind(dimBehind: Boolean): AnyDialog {
-        this.dimBehind = dimBehind
-        return this
-    }
-
-    /**
-     * 背景变暗，所有dialog公用同一个背景遮罩
-     * 如果2个dialog的dimAmount不同，则以最后弹出的为准
-     * 即，如果先弹出一个dimAmount=1的弹窗，背景会变为黑色
-     * 再弹出一个dimAmount=0的弹窗，背景会变为透明，可以看到下面的Activity
-     * 这时应该设置这个弹窗的dimBehind=false以达到透明背景效果
-     * @see dimBehind
-     */
-    fun dimAmount(dimAmount: Float): AnyDialog {
-        this.dimAmount = dimAmount
-        return this
-    }
-
     fun cancelable(cancelable: Boolean): AnyDialog {
-        setCancelable(cancelable)
-        setCanceledOnTouchOutside(cancelable)
+        cancelableOnClickKeyBack(cancelable)
+        cancelableOnTouchOutside(cancelable)
         return this
     }
 

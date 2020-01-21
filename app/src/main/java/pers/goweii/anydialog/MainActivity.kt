@@ -20,11 +20,7 @@ class MainActivity : AppCompatActivity() {
             }.show()
         }
         btn_full.setOnClickListener {
-            AnyDialog(this) {
-                fitSystemBottom = true
-                fitSystemRight = true
-                style = AnyDialog.Style.CENTER
-                fullscreen = true
+            FullscreenDialog(this).apply {
                 contentRes = R.layout.dialog_full
                 clickDismiss(R.id.tv_close)
                 bindData {
