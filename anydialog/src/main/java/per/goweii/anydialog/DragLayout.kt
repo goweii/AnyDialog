@@ -468,7 +468,8 @@ internal class DragLayout : FrameLayout, NestedScrollingParent3 {
             val duration: Int = if (f <= 1) {
                 _dismissDuration
             } else {
-                (_dismissDuration / f).toInt()
+                val d = (_dismissDuration / f).toInt()
+                if (d < 100) 100 else d
             }
             Log.d("DragLayout", "onStopNestedScroll->dismiss=$dismiss")
             if (dismiss) {
