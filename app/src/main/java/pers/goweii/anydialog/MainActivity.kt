@@ -19,6 +19,18 @@ class MainActivity : AppCompatActivity() {
                 clickDismiss(R.id.tv_close)
             }.show()
         }
+        btn_list.setOnClickListener {
+            AnyDialog(this) {
+                style = AnyDialog.Style.BOTTOM
+                fullscreen = true
+                fitSystemWindow = true
+                contentRes = R.layout.dialog_list
+                clickDismiss(R.id.tv_close)
+                bindData {
+                    find<RecyclerView>(R.id.rvv)?.init(false)
+                }
+            }.show()
+        }
         btn_full.setOnClickListener {
             FullscreenDialog(this).apply {
                 contentRes = R.layout.dialog_full
