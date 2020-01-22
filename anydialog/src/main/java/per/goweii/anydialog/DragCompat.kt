@@ -192,13 +192,13 @@ object DragCompat {
             return null
         }
         val contains = ArrayList<View>(views.size)
+        val r = Rect()
+        val l = IntArray(2)
         for (i in views.indices.reversed()) {
             val v = views[i]
-            val localRect = Rect()
-            val l = IntArray(2)
             v.getLocationOnScreen(l)
-            localRect.set(l[0], l[1], l[0] + v.width, l[1] + v.height)
-            if (localRect.contains(x.toInt(), y.toInt())) {
+            r.set(l[0], l[1], l[0] + v.width, l[1] + v.height)
+            if (r.contains(x.toInt(), y.toInt())) {
                 contains.add(v)
             }
         }

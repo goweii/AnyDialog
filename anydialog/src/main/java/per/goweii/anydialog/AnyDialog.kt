@@ -58,7 +58,7 @@ open class AnyDialog(
     open var style: Style? = null
         set(value) {
             field = value?.also {
-                animation = it.animRes
+                animation = it.animation
                 gravity = it.gravity
                 width = it.width
                 height = it.height
@@ -89,12 +89,12 @@ open class AnyDialog(
     protected open fun onCreateContainer(): ViewGroup {
         val parent = window!!.decorView.findViewById<ViewGroup>(Window.ID_ANDROID_CONTENT)
         return dragDirection?.let {
-            DragLayout3(parent.context).apply {
+            DragLayout(parent.context).apply {
                 dragStyle(when (it) {
-                    DragDirection.LEFT -> DragLayout3.DragStyle.Left
-                    DragDirection.TOP -> DragLayout3.DragStyle.Top
-                    DragDirection.RIGHT -> DragLayout3.DragStyle.Right
-                    DragDirection.BOTTOM -> DragLayout3.DragStyle.Bottom
+                    DragDirection.LEFT -> DragLayout.DragStyle.Left
+                    DragDirection.TOP -> DragLayout.DragStyle.Top
+                    DragDirection.RIGHT -> DragLayout.DragStyle.Right
+                    DragDirection.BOTTOM -> DragLayout.DragStyle.Bottom
                 })
                 onDragging { f ->
                     dimAmount?.let {
@@ -278,7 +278,7 @@ open class AnyDialog(
     }
 
     enum class Style(
-            val animRes: Int,
+            val animation: Int,
             val gravity: Int,
             val width: Int?,
             val height: Int?,
